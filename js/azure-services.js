@@ -5,6 +5,10 @@ class AzureAIService {
         this.baseUrl = 'https://api.cognitive.microsoft.com/';
         this.isInitialized = true;
         console.log('Azure AI Service initialized');
+
+        // Azure OpenAI configuration
+        this.openAIEndpoint = 'https://api.openai.com/v1/';
+        this.openAIModel = 'gpt-4';
     }
 
     async generateStudyPlan(testResults, duration) {
@@ -167,6 +171,169 @@ class AzureAIService {
     // Utility method to simulate API call delay
     async simulateApiCall() {
         return new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
+    // CV Builder methods
+
+    async generateCVSummary(userData) {
+        console.log('Generating CV summary with Azure AI');
+
+        // In a real implementation, this would call Azure OpenAI
+        // to generate a professional summary based on the user's experience and skills
+
+        await this.simulateApiCall();
+
+        // Construct a prompt for the AI
+        const prompt = `Generate a professional summary for a CV with the following details:
+        - Education: ${userData.education.map(edu => `${edu.degree} at ${edu.school}`).join(', ')}
+        - Experience: ${userData.experience.map(exp => `${exp.title} at ${exp.company}`).join(', ')}
+        - Skills: ${userData.skills}
+
+        The summary should be concise, professional, and highlight key strengths.`;
+
+        // In a real implementation, we would send this prompt to Azure OpenAI
+        // For now, return a mock response
+        return this.generateMockCVSummary(userData);
+    }
+
+    async suggestSkills(experience) {
+        console.log('Suggesting skills based on experience with Azure AI');
+
+        // In a real implementation, this would call Azure OpenAI
+        // to suggest relevant skills based on the user's experience
+
+        await this.simulateApiCall();
+
+        // Construct a prompt for the AI
+        const prompt = `Based on the following job experience, suggest relevant professional skills:
+        ${experience.map(exp => `- ${exp.title} at ${exp.company}: ${exp.description}`).join('\n')}
+
+        Return a list of 10-15 relevant skills that would strengthen this person's CV.`;
+
+        // In a real implementation, we would send this prompt to Azure OpenAI
+        // For now, return mock skills
+        return this.generateMockSkills(experience);
+    }
+
+    async generateFullCV(userData) {
+        console.log('Generating full CV with Azure AI');
+
+        // In a real implementation, this would call Azure Document Intelligence
+        // to format and generate a professional CV document
+
+        await this.simulateApiCall();
+
+        // For now, return a formatted HTML representation
+        return this.generateMockCVHTML(userData);
+    }
+
+    // Mock methods for CV generation
+
+    generateMockCVSummary(userData) {
+        const summaries = [
+            `Dedicated and results-driven professional with experience in ${userData.experience[0]?.title || 'various roles'}. Strong academic background with a ${userData.education[0]?.degree || 'degree'} from ${userData.education[0]?.school || 'a reputable institution'}. Skilled in ${userData.skills.split(',').slice(0, 3).join(', ') || 'various areas'}, with a proven track record of delivering high-quality results.`,
+
+            `Motivated and detail-oriented ${userData.experience[0]?.title || 'professional'} with a passion for excellence. Graduated with a ${userData.education[0]?.degree || 'degree'} and possessing ${userData.experience.length} years of relevant experience. Adept at problem-solving and collaboration, with expertise in ${userData.skills.split(',').slice(0, 3).join(', ') || 'multiple disciplines'}.`,
+
+            `Innovative and adaptable professional with a strong foundation in ${userData.education[0]?.degree || 'education'} and practical experience as a ${userData.experience[0]?.title || 'professional'}. Combines technical knowledge with excellent communication skills to deliver outstanding results. Proficient in ${userData.skills.split(',').slice(0, 3).join(', ') || 'various skills'} with a commitment to continuous improvement.`
+        ];
+
+        // Return a random summary
+        return summaries[Math.floor(Math.random() * summaries.length)];
+    }
+
+    generateMockSkills(experience) {
+        // Base skills that are generally useful
+        const baseSkills = [
+            'Communication', 'Teamwork', 'Problem Solving', 'Time Management',
+            'Critical Thinking', 'Adaptability', 'Leadership', 'Organization'
+        ];
+
+        // Technical skills based on common job titles
+        const technicalSkillsByTitle = {
+            'developer': ['JavaScript', 'HTML/CSS', 'React', 'Node.js', 'Python', 'Git', 'API Integration', 'Database Management'],
+            'engineer': ['Project Management', 'CAD Software', 'Technical Documentation', 'Quality Assurance', 'Process Improvement'],
+            'designer': ['UI/UX Design', 'Adobe Creative Suite', 'Wireframing', 'Prototyping', 'Visual Communication'],
+            'manager': ['Team Leadership', 'Strategic Planning', 'Budget Management', 'Performance Evaluation', 'Stakeholder Communication'],
+            'analyst': ['Data Analysis', 'Research', 'Report Writing', 'Statistical Methods', 'Business Intelligence Tools'],
+            'marketing': ['Social Media Marketing', 'Content Creation', 'SEO/SEM', 'Market Research', 'Campaign Management'],
+            'teacher': ['Curriculum Development', 'Student Assessment', 'Classroom Management', 'Educational Technology', 'Differentiated Instruction']
+        };
+
+        // Collect relevant technical skills based on job titles
+        let relevantSkills = [...baseSkills];
+
+        experience.forEach(exp => {
+            const title = exp.title.toLowerCase();
+
+            // Check if any key in technicalSkillsByTitle is contained in the job title
+            Object.keys(technicalSkillsByTitle).forEach(key => {
+                if (title.includes(key)) {
+                    relevantSkills = [...relevantSkills, ...technicalSkillsByTitle[key]];
+                }
+            });
+        });
+
+        // Remove duplicates and return a random selection of skills
+        const uniqueSkills = [...new Set(relevantSkills)];
+        const shuffled = uniqueSkills.sort(() => 0.5 - Math.random());
+
+        // Return 10-15 skills
+        return shuffled.slice(0, Math.floor(Math.random() * 6) + 10);
+    }
+
+    generateMockCVHTML(userData) {
+        // Create a simple HTML representation of the CV
+        return `
+        <div class="cv-document">
+            <div class="cv-header">
+                <h1 class="text-2xl font-bold">${userData.personalInfo.fullName}</h1>
+                <p>${userData.personalInfo.email} | ${userData.personalInfo.phone} | ${userData.personalInfo.location}</p>
+            </div>
+
+            <div class="cv-section mt-6">
+                <h2 class="text-xl font-bold border-b pb-1 mb-3">Professional Summary</h2>
+                <p>${userData.summary}</p>
+            </div>
+
+            <div class="cv-section mt-6">
+                <h2 class="text-xl font-bold border-b pb-1 mb-3">Experience</h2>
+                ${userData.experience.map(exp => `
+                    <div class="mb-4">
+                        <div class="flex justify-between">
+                            <h3 class="font-bold">${exp.title}</h3>
+                            <span>${exp.startDate} - ${exp.endDate}</span>
+                        </div>
+                        <p class="font-semibold">${exp.company}</p>
+                        <p class="mt-1">${exp.description}</p>
+                    </div>
+                `).join('')}
+            </div>
+
+            <div class="cv-section mt-6">
+                <h2 class="text-xl font-bold border-b pb-1 mb-3">Education</h2>
+                ${userData.education.map(edu => `
+                    <div class="mb-4">
+                        <div class="flex justify-between">
+                            <h3 class="font-bold">${edu.degree}</h3>
+                            <span>${edu.startDate} - ${edu.endDate}</span>
+                        </div>
+                        <p class="font-semibold">${edu.school}</p>
+                        ${edu.description ? `<p class="mt-1">${edu.description}</p>` : ''}
+                    </div>
+                `).join('')}
+            </div>
+
+            <div class="cv-section mt-6">
+                <h2 class="text-xl font-bold border-b pb-1 mb-3">Skills</h2>
+                <div class="flex flex-wrap gap-2">
+                    ${userData.skills.split(',').map(skill => `
+                        <span class="bg-gray-200 px-2 py-1 rounded">${skill.trim()}</span>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+        `;
     }
 }
 

@@ -9,7 +9,19 @@ const userData = {
     currentSubject: 'math',
     testResults: null,
     studyPlan: null,
-    practiceTest: null
+    practiceTest: null,
+    cvData: {
+        personalInfo: {
+            fullName: '',
+            email: '',
+            phone: '',
+            location: ''
+        },
+        education: [],
+        experience: [],
+        skills: '',
+        summary: ''
+    }
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -328,8 +340,10 @@ function initializeCareerTools() {
     const startInterviewPrepBtn = document.getElementById('startInterviewPrep');
 
     if (startCVBuilderBtn) {
-        startCVBuilderBtn.addEventListener('click', () => {
-            alert('CV Builder will be available soon!');
+        startCVBuilderBtn.addEventListener('click', async () => {
+            // Navigate to CV builder page
+            await navigateToPage('cv-builder');
+            initializeCVBuilder();
         });
     }
 
@@ -337,6 +351,391 @@ function initializeCareerTools() {
         startInterviewPrepBtn.addEventListener('click', () => {
             alert('Interview Preparation will be available soon!');
         });
+    }
+}
+
+// Function to initialize the CV Builder
+function initializeCVBuilder() {
+    console.log('Initializing CV Builder');
+
+    // Get form elements
+    const cvBuilderForm = document.getElementById('cv-builder-form');
+    const addEducationBtn = document.getElementById('add-education');
+    const addExperienceBtn = document.getElementById('add-experience');
+    const suggestSkillsBtn = document.getElementById('suggest-skills');
+    const generateSummaryBtn = document.getElementById('generate-summary');
+    const previewCVBtn = document.getElementById('preview-cv');
+    const backToCareerToolsBtn = document.getElementById('back-to-career-tools');
+
+    // Education and experience counters
+    let educationCount = 1;
+    let experienceCount = 1;
+
+    // Set up back button
+    if (backToCareerToolsBtn) {
+        backToCareerToolsBtn.addEventListener('click', () => {
+            navigateToPage('career-tools');
+        });
+    }
+
+    // Add education entry
+    if (addEducationBtn) {
+        addEducationBtn.addEventListener('click', () => {
+            educationCount++;
+            const educationContainer = document.getElementById('education-container');
+
+            const newEducationEntry = document.createElement('div');
+            newEducationEntry.className = 'education-entry border-b pb-4 mb-4';
+            newEducationEntry.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 mb-2" for="school-name-${educationCount}">School/University</label>
+                        <input type="text" id="school-name-${educationCount}" class="w-full p-2 border rounded" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2" for="degree-${educationCount}">Degree/Certificate</label>
+                        <input type="text" id="degree-${educationCount}" class="w-full p-2 border rounded" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2" for="edu-start-date-${educationCount}">Start Date</label>
+                        <input type="month" id="edu-start-date-${educationCount}" class="w-full p-2 border rounded" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2" for="edu-end-date-${educationCount}">End Date</label>
+                        <input type="month" id="edu-end-date-${educationCount}" class="w-full p-2 border rounded" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-gray-700 mb-2" for="edu-description-${educationCount}">Description</label>
+                        <textarea id="edu-description-${educationCount}" class="w-full p-2 border rounded" rows="3"></textarea>
+                    </div>
+                </div>
+                <button type="button" class="remove-education text-red-600 hover:underline mt-2 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                    Remove
+                </button>
+            `;
+
+            educationContainer.appendChild(newEducationEntry);
+
+            // Add event listener to remove button
+            const removeBtn = newEducationEntry.querySelector('.remove-education');
+            removeBtn.addEventListener('click', () => {
+                educationContainer.removeChild(newEducationEntry);
+            });
+        });
+    }
+
+    // Add experience entry
+    if (addExperienceBtn) {
+        addExperienceBtn.addEventListener('click', () => {
+            experienceCount++;
+            const experienceContainer = document.getElementById('experience-container');
+
+            const newExperienceEntry = document.createElement('div');
+            newExperienceEntry.className = 'experience-entry border-b pb-4 mb-4';
+            newExperienceEntry.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 mb-2" for="company-name-${experienceCount}">Company</label>
+                        <input type="text" id="company-name-${experienceCount}" class="w-full p-2 border rounded" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2" for="job-title-${experienceCount}">Job Title</label>
+                        <input type="text" id="job-title-${experienceCount}" class="w-full p-2 border rounded" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2" for="exp-start-date-${experienceCount}">Start Date</label>
+                        <input type="month" id="exp-start-date-${experienceCount}" class="w-full p-2 border rounded" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2" for="exp-end-date-${experienceCount}">End Date</label>
+                        <input type="month" id="exp-end-date-${experienceCount}" class="w-full p-2 border rounded" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-gray-700 mb-2" for="job-description-${experienceCount}">Description</label>
+                        <textarea id="job-description-${experienceCount}" class="w-full p-2 border rounded" rows="3" placeholder="Describe your responsibilities and achievements..."></textarea>
+                    </div>
+                </div>
+                <button type="button" class="remove-experience text-red-600 hover:underline mt-2 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                    Remove
+                </button>
+            `;
+
+            experienceContainer.appendChild(newExperienceEntry);
+
+            // Add event listener to remove button
+            const removeBtn = newExperienceEntry.querySelector('.remove-experience');
+            removeBtn.addEventListener('click', () => {
+                experienceContainer.removeChild(newExperienceEntry);
+            });
+        });
+    }
+
+    // Suggest skills with AI
+    if (suggestSkillsBtn) {
+        suggestSkillsBtn.addEventListener('click', async () => {
+            // Collect experience data
+            const experience = collectExperienceData();
+
+            if (experience.length === 0) {
+                alert('Please add at least one experience entry to generate skill suggestions.');
+                return;
+            }
+
+            suggestSkillsBtn.textContent = 'Generating suggestions...';
+            suggestSkillsBtn.disabled = true;
+
+            try {
+                // Call Azure AI to suggest skills
+                const suggestedSkills = await azureService.suggestSkills(experience);
+
+                // Display suggested skills
+                const suggestedSkillsContainer = document.getElementById('suggested-skills-container');
+                const suggestedSkillsElement = document.getElementById('suggested-skills');
+
+                suggestedSkillsElement.innerHTML = '';
+                suggestedSkills.forEach(skill => {
+                    const skillElement = document.createElement('span');
+                    skillElement.className = 'bg-blue-100 text-blue-800 px-2 py-1 rounded cursor-pointer hover:bg-blue-200';
+                    skillElement.textContent = skill;
+
+                    // Add click event to add skill to the skills input
+                    skillElement.addEventListener('click', () => {
+                        const skillsInput = document.getElementById('skills');
+                        const currentSkills = skillsInput.value.trim();
+
+                        if (currentSkills) {
+                            skillsInput.value = currentSkills + ', ' + skill;
+                        } else {
+                            skillsInput.value = skill;
+                        }
+                    });
+
+                    suggestedSkillsElement.appendChild(skillElement);
+                });
+
+                suggestedSkillsContainer.classList.remove('hidden');
+            } catch (error) {
+                console.error('Error suggesting skills:', error);
+                alert('There was an error generating skill suggestions. Please try again.');
+            } finally {
+                suggestSkillsBtn.textContent = 'Suggest Skills with AI';
+                suggestSkillsBtn.disabled = false;
+            }
+        });
+    }
+
+    // Generate summary with AI
+    if (generateSummaryBtn) {
+        generateSummaryBtn.addEventListener('click', async () => {
+            // Collect all CV data
+            const cvData = collectCVData();
+
+            if (!validateCVData(cvData)) {
+                alert('Please fill in all required fields before generating a summary.');
+                return;
+            }
+
+            generateSummaryBtn.textContent = 'Generating summary...';
+            generateSummaryBtn.disabled = true;
+
+            try {
+                // Call Azure AI to generate summary
+                const summary = await azureService.generateCVSummary(cvData);
+
+                // Update summary field
+                const summaryInput = document.getElementById('summary');
+                summaryInput.value = summary;
+
+                // Update user data
+                userData.cvData = cvData;
+                userData.cvData.summary = summary;
+            } catch (error) {
+                console.error('Error generating summary:', error);
+                alert('There was an error generating your summary. Please try again.');
+            } finally {
+                generateSummaryBtn.textContent = 'Generate Summary with AI';
+                generateSummaryBtn.disabled = false;
+            }
+        });
+    }
+
+    // Preview CV
+    if (previewCVBtn) {
+        previewCVBtn.addEventListener('click', async () => {
+            // Collect all CV data
+            const cvData = collectCVData();
+
+            if (!validateCVData(cvData)) {
+                alert('Please fill in all required fields before previewing your CV.');
+                return;
+            }
+
+            // Update summary if empty
+            if (!cvData.summary.trim()) {
+                try {
+                    const summary = await azureService.generateCVSummary(cvData);
+                    cvData.summary = summary;
+                    document.getElementById('summary').value = summary;
+                } catch (error) {
+                    console.error('Error generating summary:', error);
+                }
+            }
+
+            // Update user data
+            userData.cvData = cvData;
+
+            // Generate CV HTML
+            const cvHTML = await azureService.generateFullCV(cvData);
+
+            // Show preview modal
+            const previewModal = document.getElementById('cv-preview-modal');
+            const previewContent = document.getElementById('cv-preview-content');
+
+            previewContent.innerHTML = cvHTML;
+            previewModal.classList.remove('hidden');
+
+            // Set up close button
+            const closePreviewBtn = document.getElementById('close-preview');
+            if (closePreviewBtn) {
+                closePreviewBtn.addEventListener('click', () => {
+                    previewModal.classList.add('hidden');
+                });
+            }
+
+            // Set up download button
+            const downloadCVBtn = document.getElementById('download-cv');
+            if (downloadCVBtn) {
+                downloadCVBtn.addEventListener('click', () => {
+                    alert('In a real implementation, this would generate a PDF file of your CV using Azure Document Intelligence.');
+                    previewModal.classList.add('hidden');
+                });
+            }
+        });
+    }
+
+    // Submit form
+    if (cvBuilderForm) {
+        cvBuilderForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Collect all CV data
+            const cvData = collectCVData();
+
+            if (!validateCVData(cvData)) {
+                alert('Please fill in all required fields before generating your CV.');
+                return;
+            }
+
+            // Update user data
+            userData.cvData = cvData;
+
+            try {
+                // In a real implementation, this would save the CV to the user's account
+                // and generate a downloadable PDF using Azure Document Intelligence
+
+                alert('Your CV has been generated successfully! In a real implementation, you would be able to download it as a PDF.');
+
+                // Navigate back to career tools
+                navigateToPage('career-tools');
+            } catch (error) {
+                console.error('Error generating CV:', error);
+                alert('There was an error generating your CV. Please try again.');
+            }
+        });
+    }
+
+    // Helper functions
+
+    function collectEducationData() {
+        const education = [];
+        const educationEntries = document.querySelectorAll('.education-entry');
+
+        educationEntries.forEach((entry, index) => {
+            const entryNumber = index + 1;
+            const school = document.getElementById(`school-name-${entryNumber}`)?.value;
+            const degree = document.getElementById(`degree-${entryNumber}`)?.value;
+            const startDate = document.getElementById(`edu-start-date-${entryNumber}`)?.value;
+            const endDate = document.getElementById(`edu-end-date-${entryNumber}`)?.value;
+            const description = document.getElementById(`edu-description-${entryNumber}`)?.value;
+
+            if (school && degree) {
+                education.push({
+                    school,
+                    degree,
+                    startDate,
+                    endDate,
+                    description
+                });
+            }
+        });
+
+        return education;
+    }
+
+    function collectExperienceData() {
+        const experience = [];
+        const experienceEntries = document.querySelectorAll('.experience-entry');
+
+        experienceEntries.forEach((entry, index) => {
+            const entryNumber = index + 1;
+            const company = document.getElementById(`company-name-${entryNumber}`)?.value;
+            const title = document.getElementById(`job-title-${entryNumber}`)?.value;
+            const startDate = document.getElementById(`exp-start-date-${entryNumber}`)?.value;
+            const endDate = document.getElementById(`exp-end-date-${entryNumber}`)?.value;
+            const description = document.getElementById(`job-description-${entryNumber}`)?.value;
+
+            if (company && title) {
+                experience.push({
+                    company,
+                    title,
+                    startDate,
+                    endDate,
+                    description
+                });
+            }
+        });
+
+        return experience;
+    }
+
+    function collectCVData() {
+        return {
+            personalInfo: {
+                fullName: document.getElementById('full-name')?.value || '',
+                email: document.getElementById('email')?.value || '',
+                phone: document.getElementById('phone')?.value || '',
+                location: document.getElementById('location')?.value || ''
+            },
+            education: collectEducationData(),
+            experience: collectExperienceData(),
+            skills: document.getElementById('skills')?.value || '',
+            summary: document.getElementById('summary')?.value || ''
+        };
+    }
+
+    function validateCVData(cvData) {
+        // Check personal info
+        if (!cvData.personalInfo.fullName || !cvData.personalInfo.email || !cvData.personalInfo.phone) {
+            return false;
+        }
+
+        // Check education
+        if (cvData.education.length === 0) {
+            return false;
+        }
+
+        // Check experience
+        if (cvData.experience.length === 0) {
+            return false;
+        }
+
+        return true;
     }
 }
 
