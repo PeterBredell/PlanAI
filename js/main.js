@@ -313,9 +313,26 @@ function initializeDashboard() {
     const careerToolsBtn = document.getElementById('careerTools');
 
     if (viewStudyPlanBtn) {
-        viewStudyPlanBtn.addEventListener('click', () => {
-            // Show study plan (to be implemented)
-            alert('Study plan feature coming soon!');
+        viewStudyPlanBtn.addEventListener('click', async () => {
+            try {
+                // Create mock test results
+                userData.testResults = {
+                    subject: userData.currentSubject,
+                    fileName: 'sample_test.pdf',
+                    submissionDate: new Date().toISOString()
+                };
+
+                // Generate study plan using Azure AI with mock data
+                const studyPlan = await azureService.generateStudyPlan(userData.testResults, 4); // 4-week plan
+                userData.studyPlan = studyPlan;
+
+                // Navigate to study plan page
+                await navigateToPage('study-plan');
+                updateStudyPlanView();
+            } catch (error) {
+                console.error('Error generating study plan:', error);
+                alert('There was an error generating your study plan. Please try again.');
+            }
         });
     }
 
