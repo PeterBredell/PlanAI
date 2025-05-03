@@ -18,6 +18,12 @@ class AzureAIService {
             feedback: [],
             results: null
         };
+
+        // Curriculum data
+        this.curriculumData = {
+            currentCurriculum: null,
+            studyPlans: {}
+        };
     }
 
     async generateStudyPlan(testResults, duration) {
@@ -55,6 +61,70 @@ class AzureAIService {
             timeLimit: 60, // minutes
             totalPoints: 100
         };
+    }
+
+    async processCurriculum(curriculumData) {
+        // In a real implementation, this would use Azure Document Intelligence
+        // to extract and process the curriculum data from the uploaded file
+
+        console.log('Processing curriculum for', curriculumData.subject);
+
+        // Simulate API call delay
+        await this.simulateApiCall();
+
+        // Store the curriculum data
+        this.curriculumData.currentCurriculum = {
+            subject: curriculumData.subject,
+            year: curriculumData.year,
+            fileName: curriculumData.fileName,
+            uploadDate: new Date().toISOString(),
+            topics: this.generateMockCurriculumTopics(curriculumData.subject)
+        };
+
+        return this.curriculumData.currentCurriculum;
+    }
+
+    async generateCurriculumStudyPlan(curriculumId, duration, additionalNotes = '') {
+        // In a real implementation, this would call Azure OpenAI
+        // to generate a personalized study plan based on the curriculum and desired duration
+
+        console.log('Generating curriculum-based study plan for', duration, 'weeks');
+
+        // Simulate API call delay
+        await this.simulateApiCall();
+
+        // Check if we have the curriculum data
+        if (!this.curriculumData.currentCurriculum) {
+            throw new Error('No curriculum data available. Please process a curriculum first.');
+        }
+
+        // Construct a prompt for the AI
+        const prompt = `Generate a ${duration}-week study plan based on the following curriculum:
+        Subject: ${this.curriculumData.currentCurriculum.subject}
+        Academic Year: ${this.curriculumData.currentCurriculum.year}
+        Topics: ${this.curriculumData.currentCurriculum.topics.map(topic => topic.name).join(', ')}
+
+        Additional Notes: ${additionalNotes}
+
+        The study plan should include weekly focus areas, daily tasks, and recommended resources.`;
+
+        // In a real implementation, we would send this prompt to Azure OpenAI
+        // For now, generate a mock study plan
+        const studyPlan = {
+            id: `sp-${Date.now()}`,
+            curriculumId: curriculumId,
+            subject: this.curriculumData.currentCurriculum.subject,
+            duration: duration,
+            creationDate: new Date().toISOString(),
+            weeklyPlans: this.generateCurriculumWeeklyPlans(this.curriculumData.currentCurriculum, duration),
+            recommendedResources: this.generateMockResources(this.curriculumData.currentCurriculum.subject),
+            aiGeneratedFeedback: this.generateCurriculumFeedback(this.curriculumData.currentCurriculum, additionalNotes)
+        };
+
+        // Store the study plan
+        this.curriculumData.studyPlans[studyPlan.id] = studyPlan;
+
+        return studyPlan;
     }
 
     async provideFeedback(testSubmission) {
@@ -96,6 +166,107 @@ class AzureAIService {
         }
 
         return weeks;
+    }
+
+    generateMockCurriculumTopics(subject) {
+        const topicsBySubject = {
+            math: [
+                { name: 'Algebra', subtopics: ['Linear Equations', 'Quadratic Equations', 'Functions', 'Inequalities'] },
+                { name: 'Geometry', subtopics: ['Triangles', 'Circles', 'Polygons', 'Coordinate Geometry'] },
+                { name: 'Calculus', subtopics: ['Limits', 'Derivatives', 'Integrals', 'Applications'] },
+                { name: 'Statistics', subtopics: ['Probability', 'Data Analysis', 'Hypothesis Testing', 'Regression'] },
+                { name: 'Trigonometry', subtopics: ['Right Triangles', 'Unit Circle', 'Trigonometric Functions', 'Identities'] }
+            ],
+            science: [
+                { name: 'Physics', subtopics: ['Mechanics', 'Electricity', 'Magnetism', 'Thermodynamics', 'Optics'] },
+                { name: 'Chemistry', subtopics: ['Atomic Structure', 'Chemical Bonding', 'Reactions', 'Organic Chemistry'] },
+                { name: 'Biology', subtopics: ['Cell Biology', 'Genetics', 'Ecology', 'Evolution', 'Physiology'] },
+                { name: 'Earth Science', subtopics: ['Geology', 'Meteorology', 'Oceanography', 'Astronomy'] },
+                { name: 'Scientific Method', subtopics: ['Observation', 'Hypothesis', 'Experimentation', 'Analysis'] }
+            ],
+            english: [
+                { name: 'Literature', subtopics: ['Fiction', 'Poetry', 'Drama', 'Literary Analysis'] },
+                { name: 'Grammar', subtopics: ['Parts of Speech', 'Sentence Structure', 'Punctuation', 'Usage'] },
+                { name: 'Composition', subtopics: ['Essay Writing', 'Research Papers', 'Creative Writing', 'Rhetoric'] },
+                { name: 'Vocabulary', subtopics: ['Word Origins', 'Context Clues', 'Word Relationships', 'Academic Vocabulary'] },
+                { name: 'Reading Comprehension', subtopics: ['Main Idea', 'Supporting Details', 'Inference', 'Author\'s Purpose'] }
+            ],
+            history: [
+                { name: 'Ancient Civilizations', subtopics: ['Mesopotamia', 'Egypt', 'Greece', 'Rome'] },
+                { name: 'Middle Ages', subtopics: ['Feudalism', 'Byzantine Empire', 'Islamic World', 'Crusades'] },
+                { name: 'Renaissance and Reformation', subtopics: ['Art and Culture', 'Scientific Revolution', 'Religious Changes', 'Exploration'] },
+                { name: 'Modern History', subtopics: ['Industrial Revolution', 'World Wars', 'Cold War', 'Globalization'] },
+                { name: 'Historical Methods', subtopics: ['Primary Sources', 'Historiography', 'Chronology', 'Historical Analysis'] }
+            ],
+            computer_science: [
+                { name: 'Programming Fundamentals', subtopics: ['Variables', 'Control Structures', 'Functions', 'Data Structures'] },
+                { name: 'Algorithms', subtopics: ['Sorting', 'Searching', 'Recursion', 'Complexity Analysis'] },
+                { name: 'Web Development', subtopics: ['HTML/CSS', 'JavaScript', 'Frameworks', 'Backend Development'] },
+                { name: 'Databases', subtopics: ['SQL', 'Database Design', 'Normalization', 'Query Optimization'] },
+                { name: 'Computer Systems', subtopics: ['Operating Systems', 'Networks', 'Computer Architecture', 'Security'] }
+            ],
+            other: [
+                { name: 'Topic 1', subtopics: ['Subtopic 1.1', 'Subtopic 1.2', 'Subtopic 1.3', 'Subtopic 1.4'] },
+                { name: 'Topic 2', subtopics: ['Subtopic 2.1', 'Subtopic 2.2', 'Subtopic 2.3', 'Subtopic 2.4'] },
+                { name: 'Topic 3', subtopics: ['Subtopic 3.1', 'Subtopic 3.2', 'Subtopic 3.3', 'Subtopic 3.4'] },
+                { name: 'Topic 4', subtopics: ['Subtopic 4.1', 'Subtopic 4.2', 'Subtopic 4.3', 'Subtopic 4.4'] },
+                { name: 'Topic 5', subtopics: ['Subtopic 5.1', 'Subtopic 5.2', 'Subtopic 5.3', 'Subtopic 5.4'] }
+            ]
+        };
+
+        return topicsBySubject[subject] || topicsBySubject.other;
+    }
+
+    generateCurriculumWeeklyPlans(curriculum, duration) {
+        const weeks = [];
+        const topics = curriculum.topics;
+
+        // Distribute topics across weeks
+        const topicsPerWeek = Math.ceil(topics.length / duration);
+
+        for (let i = 1; i <= duration; i++) {
+            const weekTopics = topics.slice((i - 1) * topicsPerWeek, i * topicsPerWeek);
+            const focusTopic = weekTopics.length > 0 ? weekTopics[0].name : `Week ${i} topics`;
+            const subtopics = weekTopics.flatMap(topic => topic.subtopics || []);
+
+            weeks.push({
+                week: i,
+                focus: `${focusTopic} and related concepts`,
+                topics: weekTopics.map(t => t.name),
+                dailyTasks: [
+                    { day: 'Monday', task: `Introduction to ${focusTopic} (1 hour)` },
+                    { day: 'Tuesday', task: subtopics.length > 0 ? `Study ${subtopics[0]} (1 hour)` : 'Practice problems (1 hour)' },
+                    { day: 'Wednesday', task: subtopics.length > 1 ? `Study ${subtopics[1]} (45 minutes)` : 'Watch tutorial videos (45 minutes)' },
+                    { day: 'Thursday', task: subtopics.length > 2 ? `Study ${subtopics[2]} (1 hour)` : 'Group study session (1 hour)' },
+                    { day: 'Friday', task: 'Practice test on weekly topics (30 minutes)' },
+                    { day: 'Weekend', task: 'Review and reflect on weekly progress' }
+                ]
+            });
+        }
+
+        return weeks;
+    }
+
+    generateCurriculumFeedback(curriculum, additionalNotes) {
+        const subjectFeedback = {
+            math: `This study plan focuses on mastering key mathematical concepts from your curriculum. I've organized the topics to build progressively on your knowledge, starting with foundational concepts and moving to more advanced applications. Each week includes a mix of theory, practice problems, and self-assessment to ensure comprehensive understanding.`,
+
+            science: `Your science curriculum has been organized into a structured study plan that balances theoretical knowledge with practical applications. The plan emphasizes understanding scientific principles, conducting experiments, and analyzing results. Regular self-assessment will help you track your progress and identify areas that need additional focus.`,
+
+            english: `This English study plan is designed to develop your skills in reading, writing, and literary analysis. I've balanced grammar and vocabulary work with literature study and composition practice. The plan includes regular writing exercises to help you apply what you've learned and develop your unique voice.`,
+
+            history: `Your history curriculum has been transformed into a chronological study plan that helps you understand the connections between historical events and their significance. The plan emphasizes primary source analysis, historical context, and developing critical thinking about historical narratives.`,
+
+            computer_science: `This computer science study plan balances theoretical concepts with practical programming experience. Each week builds on previous knowledge, with regular coding exercises to reinforce learning. The plan is designed to develop both your technical skills and problem-solving abilities.`,
+
+            other: `I've created a comprehensive study plan based on your curriculum. The plan is structured to provide a balanced approach to learning, with a mix of theory, practice, and self-assessment. Each week builds on previous knowledge to ensure steady progress throughout the duration of the plan.`
+        };
+
+        // Add personalization based on additional notes if provided
+        const personalization = additionalNotes ?
+            `\n\nBased on your additional notes, I've incorporated ${additionalNotes.substring(0, 50)}... into the study plan to address your specific needs and goals.` : '';
+
+        return subjectFeedback[curriculum.subject] + personalization;
     }
 
     generateMockResources(subject) {

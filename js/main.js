@@ -188,6 +188,7 @@ function initializeTestSubmission() {
 // Function to update the study plan view with data
 function updateStudyPlanView() {
     const studyPlanSubject = document.getElementById('study-plan-subject');
+    const studyPlanSource = document.getElementById('study-plan-source');
     const aiFeedback = document.getElementById('ai-feedback');
     const weeklyPlansElement = document.getElementById('weekly-plans');
     const recommendedResourcesElement = document.getElementById('recommended-resources');
@@ -199,21 +200,103 @@ function updateStudyPlanView() {
         studyPlanSubject.textContent = userData.studyPlan.subject;
     }
 
+    // Update source information
+    if (studyPlanSource) {
+        const isCurriculumBased = userData.studyPlan.curriculumId !== undefined;
+        studyPlanSource.textContent = isCurriculumBased
+            ? `Based on your curriculum • ${userData.studyPlan.duration} week plan`
+            : 'Based on your test results';
+    }
+
     // Update AI feedback
     if (aiFeedback) {
         aiFeedback.textContent = userData.studyPlan.aiGeneratedFeedback;
     }
 
-    // Update weekly plans (if we had dynamic data)
+    // Update weekly plans
     if (weeklyPlansElement && userData.studyPlan.weeklyPlans) {
-        // In a real implementation, we would dynamically generate the weekly plans here
-        console.log('Weekly plans data:', userData.studyPlan.weeklyPlans);
+        weeklyPlansElement.innerHTML = ''; // Clear existing content
+
+        userData.studyPlan.weeklyPlans.forEach(week => {
+            const weekElement = document.createElement('div');
+            weekElement.className = 'study-plan-week bg-gray-50 p-4 rounded-md';
+
+            // Add week title with focus area
+            const weekTitle = document.createElement('h4');
+            weekTitle.className = 'text-lg font-bold mb-3';
+            weekTitle.textContent = `Week ${week.week}: ${week.focus}`;
+            weekElement.appendChild(weekTitle);
+
+            // Add topics if available (curriculum-based plans)
+            if (week.topics && week.topics.length > 0) {
+                const topicsContainer = document.createElement('div');
+                topicsContainer.className = 'mb-3 text-sm text-gray-600';
+                topicsContainer.innerHTML = `<strong>Topics:</strong> ${week.topics.join(', ')}`;
+                weekElement.appendChild(topicsContainer);
+            }
+
+            // Add daily tasks
+            const tasksContainer = document.createElement('div');
+            tasksContainer.className = 'grid grid-cols-1 md:grid-cols-2 gap-4';
+
+            // Split tasks into two columns
+            const midpoint = Math.ceil(week.dailyTasks.length / 2);
+
+            // First column
+            const column1 = document.createElement('div');
+            week.dailyTasks.slice(0, midpoint).forEach(task => {
+                const taskElement = document.createElement('div');
+                taskElement.className = 'study-plan-day border-b pb-2 mb-2';
+                taskElement.innerHTML = `
+                    <span class="font-semibold">${task.day}:</span>
+                    <span>${task.task}</span>
+                `;
+                column1.appendChild(taskElement);
+            });
+            tasksContainer.appendChild(column1);
+
+            // Second column
+            const column2 = document.createElement('div');
+            week.dailyTasks.slice(midpoint).forEach(task => {
+                const taskElement = document.createElement('div');
+                taskElement.className = 'study-plan-day border-b pb-2 mb-2';
+                taskElement.innerHTML = `
+                    <span class="font-semibold">${task.day}:</span>
+                    <span>${task.task}</span>
+                `;
+                column2.appendChild(taskElement);
+            });
+            tasksContainer.appendChild(column2);
+
+            weekElement.appendChild(tasksContainer);
+            weeklyPlansElement.appendChild(weekElement);
+        });
     }
 
-    // Update recommended resources (if we had dynamic data)
+    // Update recommended resources
     if (recommendedResourcesElement && userData.studyPlan.recommendedResources) {
-        // In a real implementation, we would dynamically generate the resources here
-        console.log('Recommended resources:', userData.studyPlan.recommendedResources);
+        recommendedResourcesElement.innerHTML = ''; // Clear existing content
+
+        userData.studyPlan.recommendedResources.forEach(resource => {
+            const resourceElement = document.createElement('div');
+            resourceElement.className = 'bg-white p-4 rounded-lg shadow-sm';
+
+            let resourceContent = `
+                <h4 class="font-bold">${resource.type}</h4>
+                <p>${resource.title}</p>
+            `;
+
+            if (resource.author) {
+                resourceContent += `<p class="text-sm text-gray-600">by ${resource.author}</p>`;
+            }
+
+            if (resource.url) {
+                resourceContent += `<a href="${resource.url}" class="text-blue-600 hover:underline" target="_blank">Visit Resource</a>`;
+            }
+
+            resourceElement.innerHTML = resourceContent;
+            recommendedResourcesElement.appendChild(resourceElement);
+        });
     }
 
     // Set up back button
@@ -221,6 +304,14 @@ function updateStudyPlanView() {
     if (backButton) {
         backButton.addEventListener('click', () => {
             navigateToPage('dashboard');
+        });
+    }
+
+    // Set up print button
+    const printButton = document.getElementById('print-study-plan');
+    if (printButton) {
+        printButton.addEventListener('click', () => {
+            window.print();
         });
     }
 
@@ -311,26 +402,90 @@ function initializePracticeTest() {
 
 function initializeCurriculumImport() {
     const curriculumImportForm = document.getElementById('curriculumImportForm');
+    const backToDashboardBtn = document.getElementById('backToDashboard');
+    const loadingIndicator = document.getElementById('loading-indicator');
+
+    // Set up back button
+    if (backToDashboardBtn) {
+        backToDashboardBtn.addEventListener('click', () => {
+            navigateToPage('dashboard');
+        });
+    }
 
     if (curriculumImportForm) {
-        curriculumImportForm.addEventListener('submit', (e) => {
+        curriculumImportForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const curriculumFile = document.getElementById('curriculumFile').files[0];
+            const curriculumSubject = document.getElementById('curriculumSubject').value;
             const curriculumYear = document.getElementById('curriculumYear').value;
+            const studyPlanDuration = parseInt(document.getElementById('studyPlanDuration').value);
+            const additionalNotes = document.getElementById('additionalNotes').value;
 
             if (!curriculumFile) {
                 alert('Please select a curriculum file to upload');
                 return;
             }
 
-            // Simulate file upload and processing
-            alert(`Curriculum for ${curriculumYear} imported successfully!`);
+            if (!curriculumSubject) {
+                alert('Please select a subject');
+                return;
+            }
 
-            // Navigate to dashboard
-            setTimeout(() => {
-                navigateToPage('dashboard');
-            }, 1500);
+            if (!curriculumYear) {
+                alert('Please enter an academic year');
+                return;
+            }
+
+            try {
+                // Show loading indicator
+                if (loadingIndicator) {
+                    loadingIndicator.classList.remove('hidden');
+                }
+
+                // Hide form
+                curriculumImportForm.classList.add('hidden');
+
+                // Process curriculum data
+                const curriculumData = {
+                    fileName: curriculumFile.name,
+                    subject: curriculumSubject,
+                    year: curriculumYear
+                };
+
+                // Call Azure AI to process curriculum
+                const processedCurriculum = await azureService.processCurriculum(curriculumData);
+
+                // Generate study plan based on curriculum
+                const studyPlan = await azureService.generateCurriculumStudyPlan(
+                    processedCurriculum.fileName,
+                    studyPlanDuration,
+                    additionalNotes
+                );
+
+                // Store the study plan in user data
+                userData.studyPlan = studyPlan;
+                userData.currentSubject = studyPlan.subject;
+
+                // Navigate to study plan page
+                await navigateToPage('study-plan');
+                updateStudyPlanView();
+
+            } catch (error) {
+                console.error('Error processing curriculum:', error);
+                alert('There was an error processing your curriculum. Please try again.');
+
+                // Show form again
+                if (curriculumImportForm) {
+                    curriculumImportForm.classList.remove('hidden');
+                }
+
+            } finally {
+                // Hide loading indicator
+                if (loadingIndicator) {
+                    loadingIndicator.classList.add('hidden');
+                }
+            }
         });
     }
 }

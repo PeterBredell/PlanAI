@@ -6,114 +6,43 @@
             <span id="study-plan-subject" class="font-semibold">Mathematics</span>
         </div>
     </div>
-    
+
+    <div id="study-plan-source" class="mb-6 text-sm text-gray-500">
+        <!-- Will be filled dynamically: "Based on your test results" or "Based on your curriculum" -->
+    </div>
+
     <div class="mb-6">
         <h3 class="text-xl font-bold mb-3">AI Feedback</h3>
         <div id="ai-feedback" class="bg-blue-50 p-4 rounded-lg border border-blue-200">
-            Based on your test results, I recommend focusing on improving your understanding of core concepts.
-            Your calculation skills are strong, but you need to work on applying these skills to word problems.
-            The study plan I've created emphasizes practice with application-based problems.
+            <!-- AI feedback will be inserted here -->
         </div>
     </div>
-    
+
     <div class="mb-6">
         <h3 class="text-xl font-bold mb-3">Weekly Plan</h3>
-        <div id="weekly-plans">
-            <!-- Week 1 -->
-            <div class="study-plan-week mb-6">
-                <h4 class="text-lg font-bold mb-2">Week 1: Foundations</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <div class="study-plan-day">
-                            <span class="font-semibold">Monday:</span>
-                            <span>Review core concepts (1 hour)</span>
-                        </div>
-                        <div class="study-plan-day">
-                            <span class="font-semibold">Tuesday:</span>
-                            <span>Practice problems (1 hour)</span>
-                        </div>
-                        <div class="study-plan-day">
-                            <span class="font-semibold">Wednesday:</span>
-                            <span>Watch tutorial videos (45 minutes)</span>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="study-plan-day">
-                            <span class="font-semibold">Thursday:</span>
-                            <span>Group study session (1 hour)</span>
-                        </div>
-                        <div class="study-plan-day">
-                            <span class="font-semibold">Friday:</span>
-                            <span>Practice test (30 minutes)</span>
-                        </div>
-                        <div class="study-plan-day">
-                            <span class="font-semibold">Weekend:</span>
-                            <span>Review and reflect on progress</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Week 2 -->
-            <div class="study-plan-week">
-                <h4 class="text-lg font-bold mb-2">Week 2: Advanced Concepts</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <div class="study-plan-day">
-                            <span class="font-semibold">Monday:</span>
-                            <span>Advanced problem solving (1 hour)</span>
-                        </div>
-                        <div class="study-plan-day">
-                            <span class="font-semibold">Tuesday:</span>
-                            <span>Word problems practice (1 hour)</span>
-                        </div>
-                        <div class="study-plan-day">
-                            <span class="font-semibold">Wednesday:</span>
-                            <span>Online course modules (1 hour)</span>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="study-plan-day">
-                            <span class="font-semibold">Thursday:</span>
-                            <span>Peer teaching session (1 hour)</span>
-                        </div>
-                        <div class="study-plan-day">
-                            <span class="font-semibold">Friday:</span>
-                            <span>Mock exam (1 hour)</span>
-                        </div>
-                        <div class="study-plan-day">
-                            <span class="font-semibold">Weekend:</span>
-                            <span>Review weak areas and adjust plan</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div id="weekly-plans" class="space-y-6">
+            <!-- Weekly plans will be inserted here dynamically -->
         </div>
     </div>
-    
+
     <div class="mb-6">
         <h3 class="text-xl font-bold mb-3">Recommended Resources</h3>
         <div id="recommended-resources" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="card">
-                <h4 class="font-bold">Book</h4>
-                <p>Advanced Mathematics</p>
-                <p class="text-sm text-gray-600">by John Smith</p>
-            </div>
-            <div class="card">
-                <h4 class="font-bold">Website</h4>
-                <p>Khan Academy</p>
-                <a href="https://www.khanacademy.org" class="text-blue-600 hover:underline" target="_blank">Visit Website</a>
-            </div>
-            <div class="card">
-                <h4 class="font-bold">Video</h4>
-                <p>Calculus Fundamentals</p>
-                <a href="#" class="text-blue-600 hover:underline">Watch Video</a>
-            </div>
+            <!-- Resources will be inserted here dynamically -->
         </div>
     </div>
-    
+
     <div class="flex justify-between">
-        <button id="back-to-dashboard" class="btn-secondary">Back to Dashboard</button>
-        <button id="generate-practice-test" class="btn-primary">Generate Practice Test</button>
+        <button id="back-to-dashboard" class="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 transition">
+            Back to Dashboard
+        </button>
+        <div>
+            <button id="print-study-plan" class="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 transition mr-2">
+                Print Study Plan
+            </button>
+            <button id="generate-practice-test" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                Generate Practice Test
+            </button>
+        </div>
     </div>
 </div>
