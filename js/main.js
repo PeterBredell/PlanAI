@@ -348,9 +348,278 @@ function initializeCareerTools() {
     }
 
     if (startInterviewPrepBtn) {
-        startInterviewPrepBtn.addEventListener('click', () => {
-            alert('Interview Preparation will be available soon!');
+        startInterviewPrepBtn.addEventListener('click', async () => {
+            // Navigate to interview prep page
+            await navigateToPage('interview-prep');
+            initializeInterviewPrep();
         });
+    }
+}
+
+// Function to initialize the Interview Preparation
+function initializeInterviewPrep() {
+    console.log('Initializing Interview Preparation');
+
+    // Get form elements
+    const interviewSetupForm = document.getElementById('interview-setup-form');
+    const backToCareerToolsBtn = document.getElementById('back-to-career-tools');
+    const interviewSession = document.getElementById('interview-session');
+    const interviewResults = document.getElementById('interview-results');
+    const submitAnswerBtn = document.getElementById('submit-answer');
+    const skipQuestionBtn = document.getElementById('skip-question');
+    const nextQuestionBtn = document.getElementById('next-question');
+    const returnToCareerToolsBtn = document.getElementById('return-to-career-tools');
+    const startNewInterviewBtn = document.getElementById('start-new-interview');
+
+    // Set up back button
+    if (backToCareerToolsBtn) {
+        backToCareerToolsBtn.addEventListener('click', () => {
+            navigateToPage('career-tools');
+        });
+    }
+
+    // Set up interview setup form
+    if (interviewSetupForm) {
+        interviewSetupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Get form values
+            const position = document.getElementById('job-position').value;
+            const experienceLevel = document.getElementById('experience-level').value;
+            const interviewType = document.getElementById('interview-type').value;
+            const skills = document.getElementById('skills').value;
+            const duration = document.getElementById('interview-duration').value;
+
+            // Calculate number of questions based on duration
+            const questionCount = Math.floor(parseInt(duration) / 2);
+
+            // Create interview setup object
+            const interviewSetup = {
+                position,
+                experienceLevel,
+                interviewType,
+                skills,
+                questionCount
+            };
+
+            try {
+                // Generate interview questions
+                await generateInterviewQuestions(interviewSetup);
+
+                // Show interview session
+                interviewSetupForm.closest('.grid').classList.add('hidden');
+                interviewSession.classList.remove('hidden');
+
+                // Display first question
+                displayCurrentQuestion();
+            } catch (error) {
+                console.error('Error generating interview questions:', error);
+                alert('There was an error generating interview questions. Please try again.');
+            }
+        });
+    }
+
+    // Set up submit answer button
+    if (submitAnswerBtn) {
+        submitAnswerBtn.addEventListener('click', async () => {
+            const answerInput = document.getElementById('answer');
+            const answer = answerInput.value.trim();
+
+            if (!answer) {
+                alert('Please provide an answer or click "Skip Question".');
+                return;
+            }
+
+            try {
+                // Evaluate answer
+                const feedback = await evaluateAnswer(azureService.interviewData.currentQuestion, answer);
+
+                // Display feedback
+                displayFeedback(feedback);
+
+                // Disable submit button
+                submitAnswerBtn.disabled = true;
+                skipQuestionBtn.disabled = true;
+
+                // Show feedback section
+                document.getElementById('feedback-section').classList.remove('hidden');
+            } catch (error) {
+                console.error('Error evaluating answer:', error);
+                alert('There was an error evaluating your answer. Please try again.');
+            }
+        });
+    }
+
+    // Set up skip question button
+    if (skipQuestionBtn) {
+        skipQuestionBtn.addEventListener('click', () => {
+            // Move to next question without submitting answer
+            moveToNextQuestion();
+        });
+    }
+
+    // Set up next question button
+    if (nextQuestionBtn) {
+        nextQuestionBtn.addEventListener('click', () => {
+            // Move to next question
+            moveToNextQuestion();
+        });
+    }
+
+    // Set up return to career tools button
+    if (returnToCareerToolsBtn) {
+        returnToCareerToolsBtn.addEventListener('click', () => {
+            navigateToPage('career-tools');
+        });
+    }
+
+    // Set up start new interview button
+    if (startNewInterviewBtn) {
+        startNewInterviewBtn.addEventListener('click', () => {
+            // Reset interview
+            resetInterview();
+        });
+    }
+
+    // Helper functions
+
+    async function generateInterviewQuestions(interviewSetup) {
+        // Call Azure AI to generate interview questions
+        return await azureService.generateInterviewQuestions(interviewSetup);
+    }
+
+    async function evaluateAnswer(questionIndex, answer) {
+        // Call Azure AI to evaluate answer
+        return await azureService.evaluateAnswer(questionIndex, answer);
+    }
+
+    function displayCurrentQuestion() {
+        const currentQuestion = azureService.interviewData.currentQuestion;
+        const totalQuestions = azureService.interviewData.questions.length;
+
+        // Update question counter
+        document.getElementById('question-counter').textContent = `${currentQuestion + 1}/${totalQuestions}`;
+
+        // Display question
+        document.getElementById('interview-question').innerHTML = `
+            <p class="text-lg font-medium">${azureService.interviewData.questions[currentQuestion].text}</p>
+            <p class="text-sm text-gray-500 mt-2">Question type: ${azureService.interviewData.questions[currentQuestion].type}</p>
+        `;
+
+        // Clear answer input
+        document.getElementById('answer').value = '';
+
+        // Hide feedback section
+        document.getElementById('feedback-section').classList.add('hidden');
+
+        // Enable submit and skip buttons
+        document.getElementById('submit-answer').disabled = false;
+        document.getElementById('skip-question').disabled = false;
+    }
+
+    function displayFeedback(feedback) {
+        const feedbackContent = document.getElementById('feedback-content');
+
+        // Create feedback HTML
+        const feedbackHTML = `
+            <div class="mb-4">
+                <div class="flex items-center mb-2">
+                    <div class="w-full bg-gray-200 rounded-full h-4">
+                        <div class="bg-blue-600 h-4 rounded-full" style="width: ${feedback.score}%"></div>
+                    </div>
+                    <span class="ml-4 font-semibold">${feedback.score}%</span>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h4 class="font-semibold mb-2">Content</h4>
+                <p class="text-gray-700">${feedback.content}</p>
+            </div>
+
+            <div class="mb-4">
+                <h4 class="font-semibold mb-2">Delivery</h4>
+                <p class="text-gray-700">${feedback.delivery}</p>
+            </div>
+
+            <div class="mb-4">
+                <h4 class="font-semibold mb-2">Areas for Improvement</h4>
+                <p class="text-gray-700">${feedback.improvement}</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <h4 class="font-semibold mb-2">Strengths</h4>
+                    <ul class="list-disc list-inside text-gray-700">
+                        ${feedback.positives.map(positive => `<li>${positive}</li>`).join('')}
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-2">Areas to Work On</h4>
+                    <ul class="list-disc list-inside text-gray-700">
+                        ${feedback.negatives.map(negative => `<li>${negative}</li>`).join('')}
+                    </ul>
+                </div>
+            </div>
+        `;
+
+        feedbackContent.innerHTML = feedbackHTML;
+    }
+
+    function moveToNextQuestion() {
+        const currentQuestion = azureService.interviewData.currentQuestion;
+        const totalQuestions = azureService.interviewData.questions.length;
+
+        // Check if this is the last question
+        if (currentQuestion === totalQuestions - 1) {
+            // Interview complete - show results
+            completeInterview();
+        } else {
+            // Move to next question
+            azureService.interviewData.currentQuestion++;
+            displayCurrentQuestion();
+        }
+    }
+
+    async function completeInterview() {
+        try {
+            // Generate interview results
+            const results = await azureService.generateInterviewResults();
+
+            // Hide interview session
+            interviewSession.classList.add('hidden');
+
+            // Show interview results
+            interviewResults.classList.remove('hidden');
+
+            // Update results UI
+            document.getElementById('performance-bar').style.width = `${results.overallScore}%`;
+            document.getElementById('performance-score').textContent = `${results.overallScore}%`;
+
+            // Update strengths list
+            const strengthsList = document.getElementById('strengths-list');
+            strengthsList.innerHTML = results.strengths.map(strength => `<li>${strength}</li>`).join('');
+
+            // Update improvements list
+            const improvementsList = document.getElementById('improvements-list');
+            improvementsList.innerHTML = results.improvements.map(improvement => `<li>${improvement}</li>`).join('');
+
+            // Update recommendations
+            document.getElementById('recommendations').textContent = results.recommendations;
+        } catch (error) {
+            console.error('Error generating interview results:', error);
+            alert('There was an error generating your interview results. Please try again.');
+        }
+    }
+
+    function resetInterview() {
+        // Hide results
+        interviewResults.classList.add('hidden');
+
+        // Show setup form
+        interviewSetupForm.closest('.grid').classList.remove('hidden');
+
+        // Reset form
+        interviewSetupForm.reset();
     }
 }
 
@@ -568,6 +837,8 @@ function initializeCVBuilder() {
     // Preview CV
     if (previewCVBtn) {
         previewCVBtn.addEventListener('click', async () => {
+            console.log('Preview CV button clicked');
+
             // Collect all CV data
             const cvData = collectCVData();
 
@@ -590,31 +861,67 @@ function initializeCVBuilder() {
             // Update user data
             userData.cvData = cvData;
 
-            // Generate CV HTML
-            const cvHTML = await azureService.generateFullCV(cvData);
+            try {
+                // Generate CV HTML
+                const cvHTML = await azureService.generateFullCV(cvData);
 
-            // Show preview modal
-            const previewModal = document.getElementById('cv-preview-modal');
-            const previewContent = document.getElementById('cv-preview-content');
+                // Show preview modal
+                const previewModal = document.getElementById('cv-preview-modal');
+                const previewContent = document.getElementById('cv-preview-content');
 
-            previewContent.innerHTML = cvHTML;
-            previewModal.classList.remove('hidden');
+                if (!previewModal || !previewContent) {
+                    console.error('Modal elements not found:', { previewModal, previewContent });
+                    alert('There was an error displaying the CV preview. Please try again.');
+                    return;
+                }
 
-            // Set up close button
-            const closePreviewBtn = document.getElementById('close-preview');
-            if (closePreviewBtn) {
-                closePreviewBtn.addEventListener('click', () => {
-                    previewModal.classList.add('hidden');
+                console.log('Setting modal content and displaying');
+
+                // Set content and show modal
+                previewContent.innerHTML = cvHTML;
+                previewModal.style.display = 'flex';
+                previewModal.classList.remove('hidden');
+
+                // Set up close button - remove any existing event listeners first
+                const closePreviewBtn = document.getElementById('close-preview');
+                if (closePreviewBtn) {
+                    // Clone and replace to remove existing event listeners
+                    const newCloseBtn = closePreviewBtn.cloneNode(true);
+                    closePreviewBtn.parentNode.replaceChild(newCloseBtn, closePreviewBtn);
+
+                    // Add new event listener
+                    newCloseBtn.addEventListener('click', () => {
+                        console.log('Close button clicked');
+                        previewModal.classList.add('hidden');
+                        previewModal.style.display = 'none';
+                    });
+                }
+
+                // Set up download button - remove any existing event listeners first
+                const downloadCVBtn = document.getElementById('download-cv');
+                if (downloadCVBtn) {
+                    // Clone and replace to remove existing event listeners
+                    const newDownloadBtn = downloadCVBtn.cloneNode(true);
+                    downloadCVBtn.parentNode.replaceChild(newDownloadBtn, downloadCVBtn);
+
+                    // Add new event listener
+                    newDownloadBtn.addEventListener('click', () => {
+                        alert('In a real implementation, this would generate a PDF file of your CV using Azure Document Intelligence.');
+                        previewModal.classList.add('hidden');
+                        previewModal.style.display = 'none';
+                    });
+                }
+
+                // Add click event to close modal when clicking outside the content
+                previewModal.addEventListener('click', (e) => {
+                    if (e.target === previewModal) {
+                        previewModal.classList.add('hidden');
+                        previewModal.style.display = 'none';
+                    }
                 });
-            }
-
-            // Set up download button
-            const downloadCVBtn = document.getElementById('download-cv');
-            if (downloadCVBtn) {
-                downloadCVBtn.addEventListener('click', () => {
-                    alert('In a real implementation, this would generate a PDF file of your CV using Azure Document Intelligence.');
-                    previewModal.classList.add('hidden');
-                });
+            } catch (error) {
+                console.error('Error generating CV preview:', error);
+                alert('There was an error generating your CV preview. Please try again.');
             }
         });
     }

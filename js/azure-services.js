@@ -9,6 +9,15 @@ class AzureAIService {
         // Azure OpenAI configuration
         this.openAIEndpoint = 'https://api.openai.com/v1/';
         this.openAIModel = 'gpt-4';
+
+        // Interview preparation data
+        this.interviewData = {
+            currentQuestion: 0,
+            questions: [],
+            answers: [],
+            feedback: [],
+            results: null
+        };
     }
 
     async generateStudyPlan(testResults, duration) {
@@ -334,6 +343,329 @@ class AzureAIService {
             </div>
         </div>
         `;
+    }
+
+    // Interview Preparation methods
+
+    async generateInterviewQuestions(interviewSetup) {
+        console.log('Generating interview questions with Azure AI');
+
+        // In a real implementation, this would call Azure OpenAI
+        // to generate interview questions based on the job position, experience level, and interview type
+
+        await this.simulateApiCall();
+
+        // Construct a prompt for the AI
+        const prompt = `Generate ${interviewSetup.questionCount} interview questions for a ${interviewSetup.experienceLevel} ${interviewSetup.position} position.
+        The interview type is ${interviewSetup.interviewType}.
+        Skills to focus on: ${interviewSetup.skills}`;
+
+        // In a real implementation, we would send this prompt to Azure OpenAI
+        // For now, return mock questions
+        const questions = this.generateMockInterviewQuestions(interviewSetup);
+
+        // Store the questions in the interview data
+        this.interviewData.questions = questions;
+        this.interviewData.currentQuestion = 0;
+        this.interviewData.answers = [];
+        this.interviewData.feedback = [];
+        this.interviewData.results = null;
+
+        return questions;
+    }
+
+    async evaluateAnswer(questionIndex, answer) {
+        console.log('Evaluating interview answer with Azure AI');
+
+        // In a real implementation, this would call Azure OpenAI
+        // to evaluate the answer and provide feedback
+
+        await this.simulateApiCall();
+
+        // Get the current question
+        const question = this.interviewData.questions[questionIndex];
+
+        // Construct a prompt for the AI
+        const prompt = `Evaluate the following answer to the interview question: "${question.text}"
+
+        Answer: "${answer}"
+
+        Provide feedback on the content, delivery, and areas for improvement.`;
+
+        // In a real implementation, we would send this prompt to Azure OpenAI
+        // For now, return mock feedback
+        const feedback = this.generateMockAnswerFeedback(question, answer);
+
+        // Store the answer and feedback
+        this.interviewData.answers[questionIndex] = answer;
+        this.interviewData.feedback[questionIndex] = feedback;
+
+        return feedback;
+    }
+
+    async generateInterviewResults() {
+        console.log('Generating interview results with Azure AI');
+
+        // In a real implementation, this would call Azure OpenAI
+        // to analyze all answers and provide overall feedback and recommendations
+
+        await this.simulateApiCall();
+
+        // Construct a prompt for the AI
+        const prompt = `Analyze the following interview answers and provide overall feedback:
+
+        ${this.interviewData.questions.map((q, i) => `
+        Question: "${q.text}"
+        Answer: "${this.interviewData.answers[i] || 'Skipped'}"
+        `).join('\n')}
+
+        Provide overall performance score, strengths, areas for improvement, and recommendations.`;
+
+        // In a real implementation, we would send this prompt to Azure OpenAI
+        // For now, return mock results
+        const results = this.generateMockInterviewResults();
+
+        // Store the results
+        this.interviewData.results = results;
+
+        return results;
+    }
+
+    // Mock methods for Interview Preparation
+
+    generateMockInterviewQuestions(interviewSetup) {
+        const questionCount = parseInt(interviewSetup.questionCount);
+        const questions = [];
+
+        // Technical questions for software/tech roles
+        const technicalQuestions = [
+            "Explain the concept of object-oriented programming and its key principles.",
+            "What is the difference between a stack and a queue? When would you use each?",
+            "Describe the process of debugging a complex issue in your code.",
+            "How do you ensure your code is maintainable and scalable?",
+            "Explain the concept of API design and best practices you follow.",
+            "What is your approach to testing code? What types of tests do you write?",
+            "Describe a challenging technical problem you've solved recently.",
+            "How do you stay updated with the latest technologies and industry trends?",
+            "Explain the concept of version control and how you use it in your workflow.",
+            "What is your experience with cloud services and infrastructure?",
+            "How do you optimize database queries for performance?",
+            "Explain the concept of asynchronous programming and when you would use it.",
+            "What security considerations do you take into account when developing software?",
+            "How do you handle error and exception handling in your code?",
+            "Describe your experience with CI/CD pipelines and deployment automation."
+        ];
+
+        // Behavioral questions
+        const behavioralQuestions = [
+            "Tell me about a time when you had to work under pressure to meet a deadline.",
+            "Describe a situation where you had to collaborate with a difficult team member.",
+            "How do you prioritize tasks when you have multiple deadlines?",
+            "Tell me about a time when you had to learn a new technology or skill quickly.",
+            "Describe a project where you demonstrated leadership skills.",
+            "How do you handle feedback and criticism?",
+            "Tell me about a time when you made a mistake and how you handled it.",
+            "How do you approach problem-solving in your work?",
+            "Describe a situation where you had to make a difficult decision with limited information.",
+            "How do you handle conflicts within a team?",
+            "Tell me about a time when you went above and beyond in your role.",
+            "How do you adapt to changing requirements or priorities?",
+            "Describe your approach to mentoring or helping junior team members.",
+            "Tell me about a time when you had to persuade others to adopt your idea or approach.",
+            "How do you maintain work-life balance in demanding roles?"
+        ];
+
+        // Select questions based on interview type
+        let selectedQuestions = [];
+
+        if (interviewSetup.interviewType === 'technical') {
+            selectedQuestions = [...technicalQuestions];
+        } else if (interviewSetup.interviewType === 'behavioral') {
+            selectedQuestions = [...behavioralQuestions];
+        } else {
+            // Mixed interview - alternate between technical and behavioral
+            for (let i = 0; i < Math.max(technicalQuestions.length, behavioralQuestions.length); i++) {
+                if (i < technicalQuestions.length) selectedQuestions.push(technicalQuestions[i]);
+                if (i < behavioralQuestions.length) selectedQuestions.push(behavioralQuestions[i]);
+            }
+        }
+
+        // Shuffle the questions
+        selectedQuestions = selectedQuestions.sort(() => 0.5 - Math.random());
+
+        // Take the required number of questions
+        for (let i = 0; i < Math.min(questionCount, selectedQuestions.length); i++) {
+            questions.push({
+                id: i + 1,
+                text: selectedQuestions[i],
+                type: technicalQuestions.includes(selectedQuestions[i]) ? 'technical' : 'behavioral'
+            });
+        }
+
+        return questions;
+    }
+
+    generateMockAnswerFeedback(question, answer) {
+        // Check if the answer is empty or too short
+        if (!answer || answer.trim().length < 20) {
+            return {
+                score: 30,
+                content: "Your answer is too brief. In an interview, it's important to provide detailed responses that showcase your knowledge and experience.",
+                delivery: "Consider expanding your answer with specific examples and details.",
+                improvement: "Try using the STAR method (Situation, Task, Action, Result) to structure your answers, especially for behavioral questions.",
+                positives: ["You attempted to answer the question"],
+                negatives: ["Answer is too brief", "Lacks specific examples", "Doesn't showcase your skills"]
+            };
+        }
+
+        // Generate random feedback based on answer length and question type
+        const answerLength = answer.length;
+        const isDetailedAnswer = answerLength > 200;
+        const isTechnicalQuestion = question.type === 'technical';
+
+        // Base score between 60-95 based on answer length
+        let score = Math.min(60 + Math.floor(answerLength / 20), 95);
+
+        // Randomize a bit
+        score = Math.max(60, Math.min(95, score + (Math.random() * 10 - 5)));
+
+        // Feedback templates
+        const contentFeedback = [
+            "Your answer demonstrates good knowledge of the subject matter.",
+            "You provided a comprehensive response that addresses the key aspects of the question.",
+            "Your answer shows a solid understanding of the concepts involved.",
+            "You've covered the main points well in your response."
+        ];
+
+        const deliveryFeedback = [
+            "Your response is well-structured and easy to follow.",
+            "You communicated your thoughts clearly and concisely.",
+            "Your answer flows logically from one point to the next.",
+            "You presented your ideas in a coherent and organized manner."
+        ];
+
+        const improvementFeedback = isTechnicalQuestion ? [
+            "Consider including more specific technical examples to strengthen your answer.",
+            "You could enhance your response by mentioning specific technologies or methodologies you've used.",
+            "Adding more details about your problem-solving approach would make your answer more compelling.",
+            "Try to quantify your achievements or the impact of your work when possible."
+        ] : [
+            "Using more specific examples from your experience would strengthen your answer.",
+            "Try to follow the STAR method more closely to structure your behavioral responses.",
+            "Adding more context about the challenges you faced would make your story more impactful.",
+            "Consider highlighting the lessons learned or skills developed from the experience you described."
+        ];
+
+        const positives = [
+            "Clear communication",
+            "Good structure",
+            "Relevant examples",
+            "Demonstrated knowledge",
+            "Logical reasoning",
+            "Problem-solving approach",
+            "Technical accuracy",
+            "Self-awareness"
+        ];
+
+        const negatives = [
+            "Could provide more specific examples",
+            "Could be more concise in some areas",
+            "Technical details could be more precise",
+            "Could highlight achievements more clearly",
+            "Could demonstrate more strategic thinking",
+            "Could show more leadership qualities",
+            "Could better quantify impact"
+        ];
+
+        // Select random feedback elements
+        const selectedContentFeedback = contentFeedback[Math.floor(Math.random() * contentFeedback.length)];
+        const selectedDeliveryFeedback = deliveryFeedback[Math.floor(Math.random() * deliveryFeedback.length)];
+        const selectedImprovementFeedback = improvementFeedback[Math.floor(Math.random() * improvementFeedback.length)];
+
+        // Select 2-3 positives
+        const shuffledPositives = [...positives].sort(() => 0.5 - Math.random());
+        const selectedPositives = shuffledPositives.slice(0, 2 + Math.floor(Math.random() * 2));
+
+        // Select 1-2 negatives
+        const shuffledNegatives = [...negatives].sort(() => 0.5 - Math.random());
+        const selectedNegatives = shuffledNegatives.slice(0, 1 + Math.floor(Math.random() * 2));
+
+        return {
+            score: score,
+            content: selectedContentFeedback + (isDetailedAnswer ? " You provided good detail in your response." : " Consider adding more detail to strengthen your answer."),
+            delivery: selectedDeliveryFeedback,
+            improvement: selectedImprovementFeedback,
+            positives: selectedPositives,
+            negatives: selectedNegatives
+        };
+    }
+
+    generateMockInterviewResults() {
+        // Calculate overall score based on individual answer scores
+        let totalScore = 0;
+        let answeredQuestions = 0;
+
+        for (let i = 0; i < this.interviewData.feedback.length; i++) {
+            if (this.interviewData.feedback[i]) {
+                totalScore += this.interviewData.feedback[i].score;
+                answeredQuestions++;
+            }
+        }
+
+        const overallScore = answeredQuestions > 0 ? Math.round(totalScore / answeredQuestions) : 70;
+
+        // Generate strengths and areas for improvement
+        const strengths = [
+            "Clear communication of ideas and concepts",
+            "Good technical knowledge in key areas",
+            "Structured approach to answering questions",
+            "Ability to provide relevant examples",
+            "Demonstrated problem-solving skills",
+            "Showed enthusiasm and passion for the field",
+            "Good understanding of industry best practices",
+            "Balanced technical and soft skills in responses"
+        ];
+
+        const improvements = [
+            "Provide more specific examples from past experience",
+            "Elaborate more on technical implementations",
+            "Structure answers more consistently using frameworks like STAR",
+            "Quantify achievements and impact more clearly",
+            "Demonstrate more strategic thinking in responses",
+            "Show more leadership qualities in behavioral examples",
+            "Be more concise in some responses",
+            "Highlight unique skills and perspectives more effectively"
+        ];
+
+        // Select random strengths and improvements based on score
+        const strengthCount = Math.floor(overallScore / 20) + 1; // 1-5 strengths
+        const improvementCount = 6 - strengthCount; // 1-5 improvements
+
+        const shuffledStrengths = [...strengths].sort(() => 0.5 - Math.random());
+        const shuffledImprovements = [...improvements].sort(() => 0.5 - Math.random());
+
+        const selectedStrengths = shuffledStrengths.slice(0, strengthCount);
+        const selectedImprovements = shuffledImprovements.slice(0, improvementCount);
+
+        // Generate recommendations
+        let recommendations = "";
+
+        if (overallScore >= 85) {
+            recommendations = "You performed excellently in this interview! Your responses were clear, detailed, and showcased your skills effectively. To further improve, focus on quantifying your achievements more and highlighting your unique value proposition. You're well-prepared for real interviews.";
+        } else if (overallScore >= 70) {
+            recommendations = "You performed well in this interview. Your responses demonstrated good knowledge and communication skills. To improve, work on providing more specific examples and structuring your answers more consistently. Practice a few more mock interviews to refine your approach.";
+        } else {
+            recommendations = "You have a solid foundation but need more practice before real interviews. Focus on structuring your answers using the STAR method for behavioral questions and providing more detailed technical explanations for technical questions. Consider preparing a list of specific examples from your experience that highlight your skills and achievements.";
+        }
+
+        return {
+            overallScore: overallScore,
+            strengths: selectedStrengths,
+            improvements: selectedImprovements,
+            recommendations: recommendations,
+            questionCount: this.interviewData.questions.length,
+            answeredCount: answeredQuestions
+        };
     }
 }
 

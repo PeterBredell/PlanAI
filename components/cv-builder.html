@@ -5,13 +5,13 @@
             Back to Career Tools
         </button>
     </div>
-    
+
     <div class="mb-8">
         <p class="text-gray-600 mb-4">
             Build a professional CV with AI assistance. Fill in your details below, and our Azure AI will help optimize your CV for maximum impact.
         </p>
     </div>
-    
+
     <form id="cv-builder-form" class="space-y-6">
         <!-- Personal Information -->
         <div class="bg-gray-50 p-4 rounded-md">
@@ -35,7 +35,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Education -->
         <div class="bg-gray-50 p-4 rounded-md">
             <h3 class="text-xl font-semibold mb-4">Education</h3>
@@ -72,7 +72,7 @@
                 Add Education
             </button>
         </div>
-        
+
         <!-- Experience -->
         <div class="bg-gray-50 p-4 rounded-md">
             <h3 class="text-xl font-semibold mb-4">Experience</h3>
@@ -109,7 +109,7 @@
                 Add Experience
             </button>
         </div>
-        
+
         <!-- Skills -->
         <div class="bg-gray-50 p-4 rounded-md">
             <h3 class="text-xl font-semibold mb-4">Skills</h3>
@@ -127,7 +127,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Summary -->
         <div class="bg-gray-50 p-4 rounded-md">
             <h3 class="text-xl font-semibold mb-4">Professional Summary</h3>
@@ -141,7 +141,7 @@
                 </button>
             </div>
         </div>
-        
+
         <div class="flex justify-between">
             <button type="button" id="preview-cv" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
                 Preview CV
@@ -151,14 +151,14 @@
             </button>
         </div>
     </form>
-    
+
     <!-- CV Preview Modal -->
-    <div id="cv-preview-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-auto">
+    <div id="cv-preview-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden" style="z-index: 9999; position: fixed; top: 0; left: 0; right: 0; bottom: 0;">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-auto m-4">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-2xl font-bold">CV Preview</h3>
-                    <button id="close-preview" class="text-gray-500 hover:text-gray-700">
+                    <button id="close-preview" class="text-gray-500 hover:text-gray-700 p-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
