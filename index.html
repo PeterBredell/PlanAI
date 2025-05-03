@@ -5,68 +5,90 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PlanAI - Educational Planning Assistant</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            100: '#1E1E2E',
+                            200: '#2A2A3C',
+                            300: '#3A3A4C',
+                            400: '#4A4A5C',
+                            500: '#5A5A6C',
+                        }
+                    },
+                    boxShadow: {
+                        'glow': '0 0 15px rgba(124, 58, 237, 0.15)',
+                        'glow-lg': '0 0 25px rgba(124, 58, 237, 0.2)',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="styles/main.css">
     <script src="js/azure-services.js" type="module"></script>
     <script src="js/main.js" type="module" defer></script>
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <header class="bg-blue-600 text-white p-4 shadow-md">
+<body class="bg-dark-100 min-h-screen text-gray-200">
+    <header class="bg-gradient-to-r from-purple-900 to-indigo-900 text-white p-4 shadow-glow">
         <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold">PlanAI</h1>
+            <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-300">PlanAI</h1>
             <nav>
                 <ul class="flex space-x-6">
-                    <li><a href="#" class="hover:underline" data-page="home">Home</a></li>
-                    <li><a href="#" class="hover:underline" data-page="dashboard">Dashboard</a></li>
-                    <li><a href="#" class="hover:underline" data-page="test-submission">Submit Tests</a></li>
-                    <li><a href="#" class="hover:underline" data-page="curriculum-import">Import Curriculum</a></li>
-                    <li><a href="#" class="hover:underline" data-page="career-tools">Career Tools</a></li>
-                    <li><a href="#" class="hover:underline" data-page="login">Login</a></li>
+                    <li><a href="#" class="nav-link hover:text-purple-300 transition-all duration-300" data-page="home">Home</a></li>
+                    <li><a href="#" class="nav-link hover:text-purple-300 transition-all duration-300" data-page="dashboard">Dashboard</a></li>
+                    <li><a href="#" class="nav-link hover:text-purple-300 transition-all duration-300" data-page="test-submission">Submit Tests</a></li>
+                    <li><a href="#" class="nav-link hover:text-purple-300 transition-all duration-300" data-page="curriculum-import">Import Curriculum</a></li>
+                    <li><a href="#" class="nav-link hover:text-purple-300 transition-all duration-300" data-page="career-tools">Career Tools</a></li>
+                    <li><a href="#" class="nav-link hover:text-purple-300 transition-all duration-300" data-page="login">Login</a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
     <main class="container mx-auto p-6">
-        <div id="page-content">
+        <div id="page-content" class="transition-opacity duration-300">
             <!-- Home page content (default view) -->
-            <section id="home-page">
+            <section id="home-page" class="fade-in">
                 <div class="text-center mb-12">
-                    <h2 class="text-4xl font-bold text-gray-800 mb-4">Your AI Educational Planning Assistant</h2>
-                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    <h2 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-300 mb-4">Your AI Educational Planning Assistant</h2>
+                    <p class="text-xl text-gray-300 max-w-3xl mx-auto">
                         PlanAI helps you organize your studies, prepare for tests, and plan your educational journey with personalized AI assistance.
                     </p>
                     <div class="mt-8">
-                        <button id="get-started-btn" class="bg-blue-600 text-white px-6 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition">
+                        <button id="get-started-btn" class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-6 py-3 rounded-lg text-lg font-semibold hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 shadow-glow transform hover:scale-105">
                             Get Started
                         </button>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-                    <div class="bg-white p-6 rounded-lg shadow-md">
-                        <h3 class="text-xl font-bold text-gray-800 mb-3">Personalized Study Plans</h3>
-                        <p class="text-gray-600">
+                    <div class="bg-dark-200 p-6 rounded-lg shadow-glow border border-purple-900/30 transition-all duration-300 hover:shadow-glow-lg transform hover:scale-[1.02]">
+                        <h3 class="text-xl font-bold text-gray-100 mb-3">Personalized Study Plans</h3>
+                        <p class="text-gray-300">
                             Submit your tests and receive AI-generated study plans tailored to improve your scores.
                         </p>
                     </div>
-                    <div class="bg-white p-6 rounded-lg shadow-md">
-                        <h3 class="text-xl font-bold text-gray-800 mb-3">Practice Test Generation</h3>
-                        <p class="text-gray-600">
+                    <div class="bg-dark-200 p-6 rounded-lg shadow-glow border border-purple-900/30 transition-all duration-300 hover:shadow-glow-lg transform hover:scale-[1.02]">
+                        <h3 class="text-xl font-bold text-gray-100 mb-3">Practice Test Generation</h3>
+                        <p class="text-gray-300">
                             Generate practice tests based on your curriculum to prepare for upcoming exams.
                         </p>
                     </div>
-                    <div class="bg-white p-6 rounded-lg shadow-md">
-                        <h3 class="text-xl font-bold text-gray-800 mb-3">Career Preparation</h3>
-                        <p class="text-gray-600">
+                    <div class="bg-dark-200 p-6 rounded-lg shadow-glow border border-purple-900/30 transition-all duration-300 hover:shadow-glow-lg transform hover:scale-[1.02]">
+                        <h3 class="text-xl font-bold text-gray-100 mb-3">Career Preparation</h3>
+                        <p class="text-gray-300">
                             Build your CV and practice for technical interviews with our AI-powered tools.
                         </p>
                     </div>
                 </div>
 
-                <div class="bg-white p-8 rounded-lg shadow-md mb-12">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4">How It Works</h2>
+                <div class="bg-dark-200 p-8 rounded-lg shadow-glow border border-purple-900/30 mb-12">
+                    <h2 class="text-2xl font-bold text-gray-100 mb-4">How It Works</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
-                            <ol class="list-decimal list-inside space-y-4 text-gray-700">
+                            <ol class="list-decimal list-inside space-y-4 text-gray-300">
                                 <li>Import your curriculum or select from our database</li>
                                 <li>Submit your test results for AI analysis</li>
                                 <li>Receive personalized feedback and study recommendations</li>
@@ -75,8 +97,8 @@
                                 <li>Track your progress and improve your scores</li>
                             </ol>
                         </div>
-                        <div class="bg-gray-200 rounded-lg flex items-center justify-center p-6">
-                            <p class="text-gray-500 italic">Interactive demo coming soon</p>
+                        <div class="bg-dark-300 rounded-lg flex items-center justify-center p-6">
+                            <p class="text-gray-400 italic">Interactive demo coming soon</p>
                         </div>
                     </div>
                 </div>
@@ -95,24 +117,24 @@
         </div>
     </main>
 
-    <footer class="bg-gray-800 text-white py-8 mt-12">
+    <footer class="bg-dark-300 text-white py-8 mt-12 border-t border-purple-900/20">
         <div class="container mx-auto px-4">
             <div class="flex flex-col md:flex-row justify-between">
                 <div class="mb-6 md:mb-0">
-                    <h2 class="text-xl font-bold mb-4">PlanAI</h2>
-                    <p class="text-gray-400">Your AI-powered educational planning assistant</p>
+                    <h2 class="text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-300">PlanAI</h2>
+                    <p class="text-gray-300">Your AI-powered educational planning assistant</p>
                 </div>
                 <div>
-                    <h3 class="text-lg font-semibold mb-3">Quick Links</h3>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="#" class="hover:text-white" data-page="home">Home</a></li>
-                        <li><a href="#" class="hover:text-white" data-page="dashboard">Dashboard</a></li>
-                        <li><a href="#" class="hover:text-white" data-page="about">About</a></li>
-                        <li><a href="#" class="hover:text-white" data-page="contact">Contact</a></li>
+                    <h3 class="text-lg font-semibold mb-3 text-gray-200">Quick Links</h3>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><a href="#" class="nav-link hover:text-purple-300 transition-all duration-300" data-page="home">Home</a></li>
+                        <li><a href="#" class="nav-link hover:text-purple-300 transition-all duration-300" data-page="dashboard">Dashboard</a></li>
+                        <li><a href="#" class="nav-link hover:text-purple-300 transition-all duration-300" data-page="about">About</a></li>
+                        <li><a href="#" class="nav-link hover:text-purple-300 transition-all duration-300" data-page="contact">Contact</a></li>
                     </ul>
                 </div>
             </div>
-            <div class="mt-8 pt-8 border-t border-gray-700 text-center text-gray-400">
+            <div class="mt-8 pt-8 border-t border-purple-900/20 text-center text-gray-400">
                 <p>&copy; 2023 PlanAI. All rights reserved.</p>
             </div>
         </div>

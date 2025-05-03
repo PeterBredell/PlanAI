@@ -38,6 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
 });
 
+
+
 // Function to handle navigation between pages
 function setupNavigation() {
     const navLinks = document.querySelectorAll('[data-page]');
@@ -53,23 +55,59 @@ function setupNavigation() {
 
 // Function to navigate to a specific page
 async function navigateToPage(pageName) {
-    // Hide all pages
+    // Update active nav link
+    updateActiveNavLink(pageName);
+
+    // Get current page
+    const currentPage = document.querySelector('[id$="-page"]:not(.hidden)');
+    const currentPageName = currentPage ? currentPage.id.replace('-page', '') : null;
+
+    // Fade out current content with a smooth transition
+    const pageContent = document.getElementById('page-content');
+    pageContent.style.opacity = '0';
+    pageContent.style.transform = 'scale(0.98)';
+
+    // Wait for fade out animation
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    // Hide all pages and remove animation classes
     const allPages = document.querySelectorAll('[id$="-page"]');
-    allPages.forEach(page => page.classList.add('hidden'));
+    allPages.forEach(page => {
+        page.classList.add('hidden');
+        page.classList.remove('fade-in', 'slide-in-right', 'slide-in-left', 'slide-up');
+    });
 
     // Show the selected page
     const selectedPage = document.getElementById(`${pageName}-page`);
 
     if (selectedPage) {
-        selectedPage.classList.remove('hidden');
-
         // Load component content if it's empty
         if (selectedPage.innerHTML.trim() === '' && pageName !== 'home') {
             try {
+                // Show loading indicator
+                selectedPage.classList.remove('hidden');
+                selectedPage.innerHTML = `
+                    <div class="flex justify-center items-center h-64">
+                        <div class="animate-pulse flex space-x-4">
+                            <div class="h-12 w-12 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full animate-pulse"></div>
+                            <div class="flex-1 space-y-4 py-1">
+                                <div class="h-4 bg-dark-300 rounded w-3/4"></div>
+                                <div class="space-y-2">
+                                    <div class="h-4 bg-dark-300 rounded"></div>
+                                    <div class="h-4 bg-dark-300 rounded w-5/6"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
                 const response = await fetch(`components/${pageName}.html`);
                 if (response.ok) {
                     const html = await response.text();
                     selectedPage.innerHTML = html;
+
+                    // Apply dark theme to dynamically loaded components
+                    applyDarkThemeToComponent(selectedPage);
 
                     // Initialize component-specific functionality
                     initializeComponent(pageName);
@@ -81,7 +119,159 @@ async function navigateToPage(pageName) {
                 selectedPage.innerHTML = '<p class="text-red-500">Error loading component</p>';
             }
         }
+
+        // Show the page
+        selectedPage.classList.remove('hidden');
+
+        // Add animation classes based on navigation direction
+        if (pageName === 'home') {
+            selectedPage.classList.add('fade-in');
+        } else if (!currentPageName || currentPageName === 'home') {
+            // Coming from home or initial load - slide in from right
+            selectedPage.classList.add('slide-in-right');
+        } else if (getPageIndex(pageName) > getPageIndex(currentPageName)) {
+            // Moving forward in navigation - slide in from right
+            selectedPage.classList.add('slide-in-right');
+        } else {
+            // Moving backward in navigation - slide in from left
+            selectedPage.classList.add('slide-in-left');
+        }
+
+        // Fade in content with a smooth scale transition
+        pageContent.style.opacity = '1';
+        pageContent.style.transform = 'scale(1)';
+
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+}
+
+// Helper function to determine page order for animation direction
+function getPageIndex(pageName) {
+    const pageOrder = [
+        'home',
+        'dashboard',
+        'test-submission',
+        'curriculum-import',
+        'career-tools',
+        'login',
+        'study-plan',
+        'practice-test',
+        'cv-builder',
+        'interview-prep'
+    ];
+
+    return pageOrder.indexOf(pageName);
+}
+
+// Function to update active nav link
+function updateActiveNavLink(pageName) {
+    // Remove active class from all nav links
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+    });
+
+    // Add active class to current nav link
+    const activeLink = document.querySelector(`.nav-link[data-page="${pageName}"]`);
+    if (activeLink) {
+        activeLink.classList.add('active');
+    }
+}
+
+// Function to apply dark theme to dynamically loaded components
+function applyDarkThemeToComponent(component) {
+    // Replace light theme classes with dark theme classes
+
+    // Background colors
+    component.querySelectorAll('.bg-white').forEach(el => {
+        el.classList.remove('bg-white');
+        el.classList.add('bg-dark-200', 'border', 'border-purple-900/30');
+
+        // Add hover effect to cards
+        if (el.classList.contains('rounded-lg') || el.classList.contains('rounded-md')) {
+            el.classList.add('transition-all', 'duration-300', 'hover:shadow-glow-lg', 'transform', 'hover:scale-[1.01]');
+        }
+    });
+
+    component.querySelectorAll('.bg-gray-50, .bg-gray-100, .bg-gray-200').forEach(el => {
+        el.classList.remove('bg-gray-50', 'bg-gray-100', 'bg-gray-200');
+        el.classList.add('bg-dark-300');
+    });
+
+    // Text colors
+    component.querySelectorAll('.text-gray-800, .text-gray-900').forEach(el => {
+        el.classList.remove('text-gray-800', 'text-gray-900');
+        el.classList.add('text-gray-100');
+
+        // Add gradient text to headings
+        if (el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3') {
+            el.classList.add('text-transparent', 'bg-clip-text', 'bg-gradient-to-r', 'from-purple-400', 'to-indigo-300');
+        }
+    });
+
+    component.querySelectorAll('.text-gray-600, .text-gray-700').forEach(el => {
+        el.classList.remove('text-gray-600', 'text-gray-700');
+        el.classList.add('text-gray-300');
+    });
+
+    // Buttons
+    component.querySelectorAll('.bg-blue-500, .bg-blue-600, .bg-blue-700').forEach(el => {
+        el.classList.remove('bg-blue-500', 'bg-blue-600', 'bg-blue-700');
+        el.classList.add('bg-gradient-to-r', 'from-purple-500', 'to-indigo-600', 'shadow-glow');
+
+        // Add hover effects
+        el.classList.add('hover:from-purple-600', 'hover:to-indigo-700', 'transition-all', 'duration-300', 'transform', 'hover:scale-105');
+
+        // Remove any existing hover classes that might conflict
+        el.classList.remove('hover:bg-blue-600', 'hover:bg-blue-700', 'hover:bg-blue-800');
+    });
+
+    // Green buttons
+    component.querySelectorAll('.bg-green-500, .bg-green-600, .bg-green-700').forEach(el => {
+        el.classList.remove('bg-green-500', 'bg-green-600', 'bg-green-700');
+        el.classList.add('bg-gradient-to-r', 'from-emerald-500', 'to-teal-600', 'shadow-glow');
+
+        // Add hover effects
+        el.classList.add('hover:from-emerald-600', 'hover:to-teal-700', 'transition-all', 'duration-300', 'transform', 'hover:scale-105');
+
+        // Remove any existing hover classes that might conflict
+        el.classList.remove('hover:bg-green-600', 'hover:bg-green-700', 'hover:bg-green-800');
+    });
+
+    // Add shadow glow to cards and containers
+    component.querySelectorAll('.shadow, .shadow-md, .shadow-lg, .rounded-lg, .rounded-md').forEach(el => {
+        el.classList.add('shadow-glow', 'border', 'border-purple-900/30');
+    });
+
+    // Style form inputs
+    component.querySelectorAll('input, select, textarea').forEach(el => {
+        if (!el.type || el.type !== 'checkbox' && el.type !== 'radio') {
+            el.classList.add('bg-dark-300', 'text-gray-200', 'border-dark-400', 'focus:ring-purple-500', 'focus:border-transparent');
+            el.classList.remove('bg-white', 'bg-gray-50', 'bg-gray-100');
+        }
+    });
+
+    // Style links
+    component.querySelectorAll('a:not([data-page])').forEach(el => {
+        if (el.classList.contains('text-blue-500') || el.classList.contains('text-blue-600')) {
+            el.classList.remove('text-blue-500', 'text-blue-600');
+            el.classList.add('text-purple-400', 'hover:text-purple-300', 'transition-all', 'duration-300');
+        }
+    });
+
+    // Add animation classes with staggered delay
+    component.querySelectorAll('.card, .bg-dark-200, .bg-dark-300, .rounded-lg, .rounded-md').forEach((el, index) => {
+        el.classList.add('slide-up');
+        el.style.animationDelay = `${index * 0.08}s`;
+    });
+
+    // Add subtle hover effects to interactive elements
+    component.querySelectorAll('button, .cursor-pointer, [role="button"]').forEach(el => {
+        if (!el.classList.contains('transform')) {
+            el.classList.add('transition-all', 'duration-300', 'hover:shadow-glow');
+        }
+    });
 }
 
 // Function to initialize component-specific functionality
