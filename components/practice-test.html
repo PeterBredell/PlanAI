@@ -1,0 +1,80 @@
+<div class="bg-white p-6 rounded-lg shadow-md">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold">Practice Test</h2>
+        <div>
+            <span class="text-gray-600">Subject: </span>
+            <span id="test-subject" class="font-semibold">Mathematics</span>
+        </div>
+    </div>
+    
+    <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <div class="flex justify-between items-center">
+            <div>
+                <p class="font-semibold">Time Limit: 60 minutes</p>
+                <p>Total Points: 100</p>
+            </div>
+            <div>
+                <p id="timer" class="text-xl font-bold">60:00</p>
+            </div>
+        </div>
+    </div>
+    
+    <div id="questions-container">
+        <!-- Question 1 -->
+        <div class="question-card">
+            <h3 class="text-lg font-bold mb-3">Question 1</h3>
+            <p class="mb-4">This is a sample question for Mathematics.</p>
+            
+            <div class="options-container">
+                <div class="option-item">
+                    <input type="radio" id="q1-a" name="q1" value="a" class="mr-2">
+                    <label for="q1-a">Option A</label>
+                </div>
+                <div class="option-item">
+                    <input type="radio" id="q1-b" name="q1" value="b" class="mr-2">
+                    <label for="q1-b">Option B</label>
+                </div>
+                <div class="option-item">
+                    <input type="radio" id="q1-c" name="q1" value="c" class="mr-2">
+                    <label for="q1-c">Option C</label>
+                </div>
+                <div class="option-item">
+                    <input type="radio" id="q1-d" name="q1" value="d" class="mr-2">
+                    <label for="q1-d">Option D</label>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Question 2 -->
+        <div class="question-card">
+            <h3 class="text-lg font-bold mb-3">Question 2</h3>
+            <p class="mb-4">This is another sample question for Mathematics.</p>
+            
+            <div class="options-container">
+                <div class="option-item">
+                    <input type="radio" id="q2-a" name="q2" value="a" class="mr-2">
+                    <label for="q2-a">Option A</label>
+                </div>
+                <div class="option-item">
+                    <input type="radio" id="q2-b" name="q2" value="b" class="mr-2">
+                    <label for="q2-b">Option B</label>
+                </div>
+                <div class="option-item">
+                    <input type="radio" id="q2-c" name="q2" value="c" class="mr-2">
+                    <label for="q2-c">Option C</label>
+                </div>
+                <div class="option-item">
+                    <input type="radio" id="q2-d" name="q2" value="d" class="mr-2">
+                    <label for="q2-d">Option D</label>
+                </div>
+            </div>
+        </div>
+        
+        <!-- More questions would be dynamically generated -->
+    </div>
+    
+    <div class="mt-6 flex justify-between">
+        <button id="back-to-dashboard" class="btn-secondary">Back to Dashboard</button>
+        <button id="submit-test" class="btn-primary">Submit Test</button>
+    </div>
+</div>
