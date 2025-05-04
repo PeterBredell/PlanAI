@@ -1,57 +1,93 @@
 <!DOCTYPE html>
 <div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
     <h2 class="text-2xl font-bold mb-6 text-center">Login to PlanAI</h2>
-    
-    <form id="loginForm">
-        <div class="mb-4">
-            <label class="block text-gray-700 mb-2" for="email">Email</label>
-            <input type="email" id="email" class="w-full p-3 border rounded" placeholder="your@email.com" required>
+
+    <!-- Login Form -->
+    <div id="login-container">
+        <form id="loginForm">
+            <div class="mb-4">
+                <label class="block text-gray-700 mb-2" for="email">Email</label>
+                <input type="email" id="email" class="w-full p-3 border rounded" placeholder="your@email.com" required>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-gray-700 mb-2" for="password">Password</label>
+                <input type="password" id="password" class="w-full p-3 border rounded" placeholder="••••••••" required>
+                <a href="#" id="forgot-password-link" class="text-sm text-blue-600 hover:underline mt-1 inline-block">Forgot password?</a>
+            </div>
+
+            <div id="login-error" class="mb-4 text-red-500 text-sm hidden"></div>
+
+            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
+                Sign In
+            </button>
+        </form>
+
+        <div class="mt-6 text-center">
+            <p class="text-gray-600">Don't have an account?
+                <a href="#" id="register-link" class="text-blue-600 hover:underline">Register</a>
+            </p>
         </div>
-        
-        <div class="mb-6">
-            <label class="block text-gray-700 mb-2" for="password">Password</label>
-            <input type="password" id="password" class="w-full p-3 border rounded" placeholder="••••••••" required>
-            <a href="#" class="text-sm text-blue-600 hover:underline mt-1 inline-block">Forgot password?</a>
-        </div>
-        
-        <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
-            Sign In
-        </button>
-    </form>
-    
-    <div class="mt-6 text-center">
-        <p class="text-gray-600">Don't have an account? 
-            <a href="#" id="register-link" class="text-blue-600 hover:underline">Register</a>
-        </p>
     </div>
-    
+
+    <!-- Registration Form -->
     <div id="register-form" class="hidden mt-8 pt-6 border-t">
         <h3 class="text-xl font-bold mb-4 text-center">Create an Account</h3>
-        
+
         <form id="registerForm">
             <div class="mb-4">
                 <label class="block text-gray-700 mb-2" for="reg-name">Full Name</label>
                 <input type="text" id="reg-name" class="w-full p-3 border rounded" required>
             </div>
-            
+
             <div class="mb-4">
                 <label class="block text-gray-700 mb-2" for="reg-email">Email</label>
                 <input type="email" id="reg-email" class="w-full p-3 border rounded" required>
             </div>
-            
+
             <div class="mb-4">
                 <label class="block text-gray-700 mb-2" for="reg-password">Password</label>
                 <input type="password" id="reg-password" class="w-full p-3 border rounded" required>
+                <p class="text-xs text-gray-500 mt-1">Password must be at least 6 characters</p>
             </div>
-            
+
             <div class="mb-6">
                 <label class="block text-gray-700 mb-2" for="reg-confirm-password">Confirm Password</label>
                 <input type="password" id="reg-confirm-password" class="w-full p-3 border rounded" required>
             </div>
-            
+
+            <div id="register-error" class="mb-4 text-red-500 text-sm hidden"></div>
+
             <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition">
                 Create Account
             </button>
+
+            <div class="mt-4 text-center">
+                <a href="#" id="back-to-login" class="text-blue-600 hover:underline text-sm">Back to Login</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Password Reset Form -->
+    <div id="password-reset-form" class="hidden mt-8 pt-6 border-t">
+        <h3 class="text-xl font-bold mb-4 text-center">Reset Password</h3>
+
+        <form id="resetPasswordForm">
+            <div class="mb-4">
+                <label class="block text-gray-700 mb-2" for="reset-email">Email</label>
+                <input type="email" id="reset-email" class="w-full p-3 border rounded" placeholder="your@email.com" required>
+            </div>
+
+            <div id="reset-error" class="mb-4 text-red-500 text-sm hidden"></div>
+            <div id="reset-success" class="mb-4 text-green-500 text-sm hidden"></div>
+
+            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
+                Send Reset Link
+            </button>
+
+            <div class="mt-4 text-center">
+                <a href="#" id="back-to-login-from-reset" class="text-blue-600 hover:underline text-sm">Back to Login</a>
+            </div>
         </form>
     </div>
 </div>

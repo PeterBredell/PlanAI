@@ -27,6 +27,12 @@
         }
     </script>
     <link rel="stylesheet" href="styles/main.css">
+    <!-- Supabase JS Library -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        // Make supabase available globally
+        window.supabase = supabase;
+    </script>
     <script src="js/azure-services.js" type="module"></script>
     <script src="js/main.js" type="module" defer></script>
 </head>
@@ -110,6 +116,7 @@
             <section id="curriculum-import-page" class="hidden"></section>
             <section id="career-tools-page" class="hidden"></section>
             <section id="login-page" class="hidden"></section>
+            <section id="profile-page" class="hidden"></section>
             <section id="study-plan-page" class="hidden"></section>
             <section id="practice-test-page" class="hidden"></section>
             <section id="cv-builder-page" class="hidden"></section>

@@ -1,6 +1,8 @@
 // Main application logic
 import AzureAIService from './azure-services.js';
 import { generatePDFFromHTML } from './pdf-utils.js';
+import { initializeSupabase, getSupabaseClient } from './supabase-client.js';
+import authService from './auth-service.js';
 
 // Initialize Azure AI Service
 let azureService;
@@ -32,6 +34,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Azure AI Service with the provided API key
     azureService = new AzureAIService('PlaceHolder API');
 
+    // Initialize Supabase with the provided credentials
+    initializeSupabase(
+        'https://revbzephgjzupznftiwf.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJldmJ6ZXBoZ2p6dXB6bmZ0aXdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYzNTk2NDIsImV4cCI6MjA2MTkzNTY0Mn0.PBsA5UjptrZwHDVMifi0z5EQ3Xwryld9bWrnSlzlFmQ'
+    );
+
+    // Set up auth state listener
+    authService.addAuthStateListener(handleAuthStateChange);
+
+    // Check if user is already authenticated
+    checkAuthState();
+
     // Set up navigation
     setupNavigation();
 
@@ -56,6 +70,33 @@ function setupNavigation() {
 
 // Function to navigate to a specific page
 async function navigateToPage(pageName) {
+    // Handle logout action
+    if (pageName === 'logout') {
+        try {
+            const { success, error } = await authService.signOut();
+
+            if (success) {
+                // Redirect to home page after logout
+                pageName = 'home';
+            } else {
+                console.error('Logout error:', error);
+                alert('Failed to log out. Please try again.');
+                return;
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+            alert('An unexpected error occurred. Please try again.');
+            return;
+        }
+    }
+
+    // Check if page requires authentication
+    const protectedPages = ['dashboard', 'test-submission', 'curriculum-import', 'career-tools', 'study-plan', 'practice-test', 'profile'];
+    if (protectedPages.includes(pageName) && !authService.isAuthenticated()) {
+        // Redirect to login if trying to access protected page without authentication
+        pageName = 'login';
+    }
+
     // Update active nav link
     updateActiveNavLink(pageName);
 
@@ -158,6 +199,7 @@ function getPageIndex(pageName) {
         'login',
         'study-plan',
         'practice-test',
+        'test-results',
         'cv-builder',
         'interview-prep'
     ];
@@ -293,6 +335,9 @@ function initializeComponent(componentName) {
         case 'login':
             initializeLogin();
             break;
+        case 'profile':
+            initializeProfile();
+            break;
         case 'interview-prep':
             initializeInterviewPrep();
             break;
@@ -305,6 +350,9 @@ function initializeComponent(componentName) {
         case 'practice-test':
             initializePracticeTest();
             break;
+        case 'test-results':
+            initializeTestResults();
+            break;
     }
 }
 
@@ -314,8 +362,87 @@ function setupEventListeners() {
     const getStartedBtn = document.getElementById('get-started-btn');
     if (getStartedBtn) {
         getStartedBtn.addEventListener('click', () => {
-            navigateToPage('dashboard');
+            // If user is authenticated, go to dashboard, otherwise go to login
+            if (authService.isAuthenticated()) {
+                navigateToPage('dashboard');
+            } else {
+                navigateToPage('login');
+            }
         });
+    }
+}
+
+// Function to handle authentication state changes
+function handleAuthStateChange(user) {
+    console.log('Auth state changed:', user ? 'User logged in' : 'User logged out');
+
+    // Update UI based on authentication state
+    updateAuthUI(!!user);
+
+    // If user logged out and was on a protected page, redirect to login
+    if (!user) {
+        const currentPage = document.querySelector('[id$="-page"]:not(.hidden)');
+        const currentPageName = currentPage ? currentPage.id.replace('-page', '') : null;
+
+        // List of pages that require authentication
+        const protectedPages = ['dashboard', 'test-submission', 'curriculum-import', 'career-tools', 'study-plan', 'practice-test', 'profile'];
+
+        if (currentPageName && protectedPages.includes(currentPageName)) {
+            navigateToPage('login');
+        }
+    }
+}
+
+// Function to check authentication state on page load
+function checkAuthState() {
+    const isAuthenticated = authService.isAuthenticated();
+    updateAuthUI(isAuthenticated);
+
+    // If user is on the login page but already authenticated, redirect to dashboard
+    const currentPage = document.querySelector('[id$="-page"]:not(.hidden)');
+    const currentPageName = currentPage ? currentPage.id.replace('-page', '') : null;
+
+    if (isAuthenticated && currentPageName === 'login') {
+        navigateToPage('dashboard');
+    }
+}
+
+// Function to update UI based on authentication state
+function updateAuthUI(isAuthenticated) {
+    // Update navigation links
+    const loginLink = document.querySelector('.nav-link[data-page="login"]');
+    const profileLink = document.querySelector('.nav-link[data-page="profile"]');
+
+    if (loginLink) {
+        if (isAuthenticated) {
+            loginLink.textContent = 'Logout';
+            loginLink.setAttribute('data-page', 'logout');
+        } else {
+            loginLink.textContent = 'Login';
+            loginLink.setAttribute('data-page', 'login');
+        }
+    }
+
+    // Add profile link if authenticated and it doesn't exist
+    if (isAuthenticated && !profileLink) {
+        const navList = document.querySelector('nav ul');
+        if (navList) {
+            const profileLi = document.createElement('li');
+            const profileA = document.createElement('a');
+            profileA.href = '#';
+            profileA.className = 'nav-link hover:text-purple-300 transition-all duration-300';
+            profileA.setAttribute('data-page', 'profile');
+            profileA.textContent = 'Profile';
+
+            profileLi.appendChild(profileA);
+            navList.appendChild(profileLi);
+
+            // Re-setup navigation to add event listener to the new link
+            setupNavigation();
+        }
+    } else if (!isAuthenticated && profileLink) {
+        // Remove profile link if not authenticated
+        profileLink.parentElement.remove();
     }
 }
 
@@ -697,47 +824,16 @@ function initializePracticeTest() {
 
         const score = Math.round((correctAnswers / userData.practiceTest.questions.length) * 100);
 
-        // Show results
-        const resultsHTML = `
-            <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div class="bg-dark-200 p-6 rounded-lg shadow-lg max-w-md w-full border border-purple-900/30">
-                    <h2 class="text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-300">Test Results</h2>
+        // Store test results in userData
+        userData.testResults = {
+            score: score,
+            correctAnswers: correctAnswers,
+            totalQuestions: userData.practiceTest.questions.length,
+            subject: userData.practiceTest.subject
+        };
 
-                    <div class="mb-4">
-                        <div class="flex items-center mb-2">
-                            <div class="w-full bg-dark-500 rounded-full h-4">
-                                <div class="bg-gradient-to-r from-purple-500 to-indigo-600 h-4 rounded-full" style="width: ${score}%"></div>
-                            </div>
-                            <span class="ml-4 font-semibold text-gray-200">${score}%</span>
-                        </div>
-                        <p class="text-gray-300">You answered ${correctAnswers} out of ${userData.practiceTest.questions.length} questions correctly.</p>
-                    </div>
-
-                    <p class="text-gray-300 mb-4">
-                        ${score >= 80 ? 'Excellent work! You have a strong understanding of the material.' :
-                          score >= 60 ? 'Good job! You have a solid grasp of the material, but there\'s room for improvement.' :
-                          'You might need more practice with this material. Review the topics and try again.'}
-                    </p>
-
-                    <div class="flex justify-end">
-                        <button id="close-results" class="bg-gradient-to-r from-purple-500 to-indigo-600 shadow-glow text-white px-4 py-2 rounded hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105">
-                            Return to Dashboard
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        // Add results to the page
-        const resultsElement = document.createElement('div');
-        resultsElement.innerHTML = resultsHTML;
-        document.body.appendChild(resultsElement);
-
-        // Set up close button
-        document.getElementById('close-results').addEventListener('click', () => {
-            document.body.removeChild(resultsElement);
-            navigateToPage('dashboard');
-        });
+        // Navigate to test results page
+        navigateToPage('test-results');
     }
 }
 
@@ -1645,43 +1741,459 @@ function initializeCVBuilder() {
     }
 }
 
+// Function to initialize the Profile page
+function initializeProfile() {
+    // Get DOM elements
+    const editProfileBtn = document.getElementById('edit-profile-btn');
+    const changePasswordBtn = document.getElementById('change-password-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const profileInfoSection = document.getElementById('profile-info-section');
+    const editProfileSection = document.getElementById('edit-profile-section');
+    const changePasswordSection = document.getElementById('change-password-section');
+    const editProfileForm = document.getElementById('edit-profile-form');
+    const changePasswordForm = document.getElementById('change-password-form');
+    const cancelEditProfileBtn = document.getElementById('cancel-edit-profile');
+    const cancelChangePasswordBtn = document.getElementById('cancel-change-password');
+    const profileUpdateError = document.getElementById('profile-update-error');
+    const profileUpdateSuccess = document.getElementById('profile-update-success');
+    const passwordUpdateError = document.getElementById('password-update-error');
+    const passwordUpdateSuccess = document.getElementById('password-update-success');
+
+    // Get current user
+    const currentUser = authService.getCurrentUser();
+
+    if (!currentUser) {
+        // If not authenticated, redirect to login
+        navigateToPage('login');
+        return;
+    }
+
+    // Update profile display with user data
+    updateProfileDisplay(currentUser);
+
+    // Handle edit profile button click
+    if (editProfileBtn) {
+        editProfileBtn.addEventListener('click', () => {
+            // Hide profile info section and show edit profile section
+            profileInfoSection.classList.add('hidden');
+            editProfileSection.classList.remove('hidden');
+            changePasswordSection.classList.add('hidden');
+
+            // Populate form with current user data
+            const nameInput = document.getElementById('edit-name');
+            if (nameInput && currentUser.user_metadata && currentUser.user_metadata.full_name) {
+                nameInput.value = currentUser.user_metadata.full_name;
+            }
+        });
+    }
+
+    // Handle change password button click
+    if (changePasswordBtn) {
+        changePasswordBtn.addEventListener('click', () => {
+            // Hide profile info section and show change password section
+            profileInfoSection.classList.add('hidden');
+            editProfileSection.classList.add('hidden');
+            changePasswordSection.classList.remove('hidden');
+        });
+    }
+
+    // Handle logout button click
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                // Sign out
+                const { success, error } = await authService.signOut();
+
+                if (success) {
+                    // Redirect to home page
+                    navigateToPage('home');
+                } else {
+                    console.error('Logout error:', error);
+                    alert('Failed to log out. Please try again.');
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('An unexpected error occurred. Please try again.');
+            }
+        });
+    }
+
+    // Handle cancel edit profile button click
+    if (cancelEditProfileBtn) {
+        cancelEditProfileBtn.addEventListener('click', () => {
+            // Hide edit profile section and show profile info section
+            profileInfoSection.classList.remove('hidden');
+            editProfileSection.classList.add('hidden');
+
+            // Clear any error or success messages
+            hideError(profileUpdateError);
+            hideSuccess(profileUpdateSuccess);
+        });
+    }
+
+    // Handle cancel change password button click
+    if (cancelChangePasswordBtn) {
+        cancelChangePasswordBtn.addEventListener('click', () => {
+            // Hide change password section and show profile info section
+            profileInfoSection.classList.remove('hidden');
+            changePasswordSection.classList.add('hidden');
+
+            // Clear any error or success messages
+            hideError(passwordUpdateError);
+            hideSuccess(passwordUpdateSuccess);
+
+            // Reset form
+            changePasswordForm.reset();
+        });
+    }
+
+    // Handle edit profile form submission
+    if (editProfileForm) {
+        editProfileForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('edit-name').value;
+
+            // Simple validation
+            if (!name) {
+                showError(profileUpdateError, 'Please enter your name');
+                return;
+            }
+
+            // Clear previous messages
+            hideError(profileUpdateError);
+            hideSuccess(profileUpdateSuccess);
+
+            try {
+                // Show loading state
+                const submitButton = editProfileForm.querySelector('button[type="submit"]');
+                submitButton.textContent = 'Saving...';
+                submitButton.disabled = true;
+
+                // Update profile
+                const { success, error } = await authService.updateProfile({ full_name: name });
+
+                if (success) {
+                    // Show success message
+                    showSuccess(profileUpdateSuccess, 'Profile updated successfully!');
+
+                    // Update profile display
+                    updateProfileDisplay(authService.getCurrentUser());
+
+                    // Return to profile info after a short delay
+                    setTimeout(() => {
+                        profileInfoSection.classList.remove('hidden');
+                        editProfileSection.classList.add('hidden');
+                        hideSuccess(profileUpdateSuccess);
+                    }, 2000);
+                } else {
+                    showError(profileUpdateError, error || 'Failed to update profile. Please try again.');
+                }
+            } catch (error) {
+                console.error('Profile update error:', error);
+                showError(profileUpdateError, 'An unexpected error occurred. Please try again.');
+            } finally {
+                // Reset button state
+                const submitButton = editProfileForm.querySelector('button[type="submit"]');
+                submitButton.textContent = 'Save Changes';
+                submitButton.disabled = false;
+            }
+        });
+    }
+
+    // Handle change password form submission
+    if (changePasswordForm) {
+        changePasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmNewPassword = document.getElementById('confirm-new-password').value;
+
+            // Simple validation
+            if (!currentPassword || !newPassword || !confirmNewPassword) {
+                showError(passwordUpdateError, 'Please fill in all fields');
+                return;
+            }
+
+            if (newPassword !== confirmNewPassword) {
+                showError(passwordUpdateError, 'New passwords do not match');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                showError(passwordUpdateError, 'New password must be at least 6 characters');
+                return;
+            }
+
+            // Clear previous messages
+            hideError(passwordUpdateError);
+            hideSuccess(passwordUpdateSuccess);
+
+            try {
+                // Show loading state
+                const submitButton = changePasswordForm.querySelector('button[type="submit"]');
+                submitButton.textContent = 'Updating...';
+                submitButton.disabled = true;
+
+                // Update password (this is a placeholder - Supabase doesn't have a direct method for this)
+                // In a real implementation, you would need to use a custom API endpoint or Supabase function
+                alert('Password change functionality will be implemented when Supabase details are provided.');
+
+                // Reset form
+                changePasswordForm.reset();
+
+                // Return to profile info
+                profileInfoSection.classList.remove('hidden');
+                changePasswordSection.classList.add('hidden');
+            } catch (error) {
+                console.error('Password update error:', error);
+                showError(passwordUpdateError, 'An unexpected error occurred. Please try again.');
+            } finally {
+                // Reset button state
+                const submitButton = changePasswordForm.querySelector('button[type="submit"]');
+                submitButton.textContent = 'Update Password';
+                submitButton.disabled = false;
+            }
+        });
+    }
+
+    // Helper function to update profile display
+    function updateProfileDisplay(user) {
+        if (!user) return;
+
+        // Update profile initials
+        const profileInitials = document.getElementById('profile-initials');
+        if (profileInitials && user.user_metadata && user.user_metadata.full_name) {
+            const name = user.user_metadata.full_name;
+            const initials = name.split(' ')
+                .map(part => part.charAt(0))
+                .join('')
+                .toUpperCase()
+                .substring(0, 2);
+            profileInitials.textContent = initials;
+        }
+
+        // Update profile name
+        const profileName = document.getElementById('profile-name');
+        if (profileName && user.user_metadata && user.user_metadata.full_name) {
+            profileName.textContent = user.user_metadata.full_name;
+        }
+
+        // Update profile email
+        const profileEmail = document.getElementById('profile-email');
+        if (profileEmail && user.email) {
+            profileEmail.textContent = user.email;
+        }
+
+        // Update display name
+        const displayName = document.getElementById('display-name');
+        if (displayName && user.user_metadata && user.user_metadata.full_name) {
+            displayName.textContent = user.user_metadata.full_name;
+        }
+
+        // Update display email
+        const displayEmail = document.getElementById('display-email');
+        if (displayEmail && user.email) {
+            displayEmail.textContent = user.email;
+        }
+
+        // Update joined date
+        const displayJoined = document.getElementById('display-joined');
+        if (displayJoined && user.created_at) {
+            const joinedDate = new Date(user.created_at);
+            displayJoined.textContent = joinedDate.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+    }
+
+    // Helper functions for showing/hiding error and success messages
+    function showError(element, message) {
+        if (element) {
+            element.textContent = message;
+            element.classList.remove('hidden');
+        }
+    }
+
+    function hideError(element) {
+        if (element) {
+            element.textContent = '';
+            element.classList.add('hidden');
+        }
+    }
+
+    function showSuccess(element, message) {
+        if (element) {
+            element.textContent = message;
+            element.classList.remove('hidden');
+        }
+    }
+
+    function hideSuccess(element) {
+        if (element) {
+            element.textContent = '';
+            element.classList.add('hidden');
+        }
+    }
+}
+
+// Function to initialize the Test Results page
+function initializeTestResults() {
+    const returnToDashboardBtn = document.getElementById('return-to-dashboard');
+    const testSubject = document.getElementById('test-subject');
+    const scoreBar = document.getElementById('score-bar');
+    const scorePercentage = document.getElementById('score-percentage');
+    const scoreText = document.getElementById('score-text');
+    const feedbackText = document.getElementById('feedback-text');
+
+    // Check if we have test results to display
+    if (userData.testResults) {
+        // Update subject
+        if (testSubject) {
+            testSubject.textContent = userData.testResults.subject || 'Unknown Subject';
+        }
+
+        // Update score bar and percentage
+        if (scoreBar && scorePercentage) {
+            const score = userData.testResults.score || 0;
+            scoreBar.style.width = `${score}%`;
+            scorePercentage.textContent = `${score}%`;
+        }
+
+        // Update score text
+        if (scoreText) {
+            const correctAnswers = userData.testResults.correctAnswers || 0;
+            const totalQuestions = userData.testResults.totalQuestions || 0;
+            scoreText.textContent = `You answered ${correctAnswers} out of ${totalQuestions} questions correctly.`;
+        }
+
+        // Update feedback text
+        if (feedbackText) {
+            const score = userData.testResults.score || 0;
+            if (score >= 80) {
+                feedbackText.textContent = 'Excellent work! You have a strong understanding of the material.';
+            } else if (score >= 60) {
+                feedbackText.textContent = 'Good job! You have a solid grasp of the material, but there\'s room for improvement.';
+            } else {
+                feedbackText.textContent = 'You might need more practice with this material. Review the topics and try again.';
+            }
+        }
+    }
+
+    // Set up return to dashboard button
+    if (returnToDashboardBtn) {
+        returnToDashboardBtn.addEventListener('click', () => {
+            navigateToPage('dashboard');
+        });
+    }
+}
+
 function initializeLogin() {
     const loginForm = document.getElementById('loginForm');
     const registerLink = document.getElementById('register-link');
     const registerForm = document.getElementById('register-form');
     const registerFormElement = document.getElementById('registerForm');
+    const forgotPasswordLink = document.getElementById('forgot-password-link');
+    const passwordResetForm = document.getElementById('password-reset-form');
+    const resetPasswordFormElement = document.getElementById('resetPasswordForm');
+    const backToLoginLink = document.getElementById('back-to-login');
+    const backToLoginFromResetLink = document.getElementById('back-to-login-from-reset');
+    const loginContainer = document.getElementById('login-container');
+    const loginError = document.getElementById('login-error');
+    const registerError = document.getElementById('register-error');
+    const resetError = document.getElementById('reset-error');
+    const resetSuccess = document.getElementById('reset-success');
 
+    // Handle register link click
     if (registerLink) {
         registerLink.addEventListener('click', (e) => {
             e.preventDefault();
-            registerForm.classList.toggle('hidden');
+            loginContainer.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+            passwordResetForm.classList.add('hidden');
         });
     }
 
+    // Handle back to login link click
+    if (backToLoginLink) {
+        backToLoginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginContainer.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+            passwordResetForm.classList.add('hidden');
+        });
+    }
+
+    // Handle forgot password link click
+    if (forgotPasswordLink) {
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginContainer.classList.add('hidden');
+            registerForm.classList.add('hidden');
+            passwordResetForm.classList.remove('hidden');
+        });
+    }
+
+    // Handle back to login from reset link click
+    if (backToLoginFromResetLink) {
+        backToLoginFromResetLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginContainer.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+            passwordResetForm.classList.add('hidden');
+        });
+    }
+
+    // Handle login form submission
     if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            // In a real app, we would authenticate with Azure AD or another service
-            console.log(`Login attempt: ${email} with password length: ${password.length}`);
-
             // Simple validation
             if (!email || !password) {
-                alert('Please enter both email and password');
+                showError(loginError, 'Please enter both email and password');
                 return;
             }
 
-            // Simulate successful login
-            alert('Login successful!');
-            navigateToPage('dashboard');
+            // Clear previous errors
+            hideError(loginError);
+
+            try {
+                // Show loading state
+                const submitButton = loginForm.querySelector('button[type="submit"]');
+                submitButton.textContent = 'Signing in...';
+                submitButton.disabled = true;
+
+                // Authenticate with Supabase
+                const { success, error } = await authService.signIn(email, password);
+
+                if (success) {
+                    // Navigate to dashboard on successful login
+                    navigateToPage('dashboard');
+                } else {
+                    showError(loginError, error || 'Failed to sign in. Please check your credentials.');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showError(loginError, 'An unexpected error occurred. Please try again.');
+            } finally {
+                // Reset button state
+                const submitButton = loginForm.querySelector('button[type="submit"]');
+                submitButton.textContent = 'Sign In';
+                submitButton.disabled = false;
+            }
         });
     }
 
+    // Handle registration form submission
     if (registerFormElement) {
-        registerFormElement.addEventListener('submit', (e) => {
+        registerFormElement.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const name = document.getElementById('reg-name').value;
@@ -1691,21 +2203,123 @@ function initializeLogin() {
 
             // Simple validation
             if (!name || !email || !password) {
-                alert('Please fill in all required fields');
+                showError(registerError, 'Please fill in all required fields');
                 return;
             }
 
             if (password !== confirmPassword) {
-                alert('Passwords do not match');
+                showError(registerError, 'Passwords do not match');
                 return;
             }
 
-            // In a real app, we would register the user with Azure AD or another service
-            console.log(`Registration: ${name}, ${email} with password length: ${password.length}`);
+            if (password.length < 6) {
+                showError(registerError, 'Password must be at least 6 characters');
+                return;
+            }
 
-            // Simulate successful registration
-            alert('Registration successful! You can now log in.');
-            registerForm.classList.add('hidden');
+            // Clear previous errors
+            hideError(registerError);
+
+            try {
+                // Show loading state
+                const submitButton = registerFormElement.querySelector('button[type="submit"]');
+                submitButton.textContent = 'Creating account...';
+                submitButton.disabled = true;
+
+                // Register with Supabase
+                const { success, error } = await authService.signUp(email, password, { full_name: name });
+
+                if (success) {
+                    // Show success message and return to login
+                    alert('Registration successful! Please check your email to confirm your account.');
+                    loginContainer.classList.remove('hidden');
+                    registerForm.classList.add('hidden');
+                } else {
+                    showError(registerError, error || 'Failed to create account. Please try again.');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                showError(registerError, 'An unexpected error occurred. Please try again.');
+            } finally {
+                // Reset button state
+                const submitButton = registerFormElement.querySelector('button[type="submit"]');
+                submitButton.textContent = 'Create Account';
+                submitButton.disabled = false;
+            }
         });
+    }
+
+    // Handle password reset form submission
+    if (resetPasswordFormElement) {
+        resetPasswordFormElement.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('reset-email').value;
+
+            // Simple validation
+            if (!email) {
+                showError(resetError, 'Please enter your email address');
+                return;
+            }
+
+            // Clear previous errors and success messages
+            hideError(resetError);
+            hideSuccess(resetSuccess);
+
+            try {
+                // Show loading state
+                const submitButton = resetPasswordFormElement.querySelector('button[type="submit"]');
+                submitButton.textContent = 'Sending...';
+                submitButton.disabled = true;
+
+                // Send password reset email
+                const { success, error } = await authService.resetPassword(email);
+
+                if (success) {
+                    // Show success message
+                    showSuccess(resetSuccess, 'Password reset link sent! Please check your email.');
+                    document.getElementById('reset-email').value = '';
+                } else {
+                    showError(resetError, error || 'Failed to send reset link. Please try again.');
+                }
+            } catch (error) {
+                console.error('Password reset error:', error);
+                showError(resetError, 'An unexpected error occurred. Please try again.');
+            } finally {
+                // Reset button state
+                const submitButton = resetPasswordFormElement.querySelector('button[type="submit"]');
+                submitButton.textContent = 'Send Reset Link';
+                submitButton.disabled = false;
+            }
+        });
+    }
+
+    // Helper functions for showing/hiding error and success messages
+    function showError(element, message) {
+        if (element) {
+            element.textContent = message;
+            element.classList.remove('hidden');
+        }
+    }
+
+    function hideError(element) {
+        if (element) {
+            element.textContent = '';
+            element.classList.add('hidden');
+        }
+    }
+
+    function showSuccess(element, message) {
+        if (element) {
+            element.textContent = message;
+            element.classList.remove('hidden');
+        }
+    }
+
+    function hideSuccess(element) {
+        if (element) {
+            element.textContent = '';
+            element.classList.add('hidden');
+        }
     }
 }
