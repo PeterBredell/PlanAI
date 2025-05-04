@@ -239,30 +239,6 @@ PlanAI follows an iterative development approach with regular updates based on:
 - Performance metrics and usage patterns
 - Security enhancements and vulnerability patching
 
-## 🔮 Future Enhancements
-
-### Short-term Roadmap (3-6 months)
-- **Enhanced Analytics Dashboard**: Detailed insights into learning patterns and progress
-- **Collaborative Study Groups**: Create and join study groups with peers
-- **Content Recommendation Engine**: AI-powered learning resource suggestions
-- **Offline Mode**: Full functionality without internet connection
-- **Dark/Light Theme Toggle**: User interface appearance preferences
-
-### Long-term Vision (6-12 months)
-- **Mobile Applications**: Native iOS and Android apps
-- **Integration with LMS Platforms**: Connect with popular Learning Management Systems
-- **AI Tutoring**: Interactive AI tutoring sessions for difficult concepts
-- **Gamification Elements**: Achievement badges, streaks, and rewards
-- **Parent/Teacher Portal**: Monitoring and guidance tools for educators and parents
-- **Blockchain Credentials**: Verifiable educational achievements and certifications
-
-### Research Initiatives
-- **Learning Pattern Analysis**: Research into effective study techniques
-- **Predictive Performance Models**: AI models to predict academic performance
-- **Personalization Algorithms**: Advanced algorithms for learning style adaptation
-- **Educational Equity**: Tools to address disparities in educational access
-
-
 <div align="center">
   <p>Made with ❤️ by the PlanAI Team</p>
   <p>© 2025 PlanAI. All rights reserved.</p>
