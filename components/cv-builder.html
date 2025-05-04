@@ -168,7 +168,11 @@
                 <div id="cv-preview-content" class="border p-8 bg-gray-50">
                     <!-- CV content will be inserted here -->
                 </div>
-                <div class="mt-6 flex justify-end">
+                <div class="mt-6 flex justify-end items-center">
+                    <div id="pdf-loading" class="hidden mr-4">
+                        <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-500 mr-2 inline-block"></div>
+                        <span class="text-sm text-gray-600">Generating PDF...</span>
+                    </div>
                     <button id="download-cv" class="bg-blue-600 text-white px-4 py-2 rounded font-semibold hover:bg-blue-700 transition">
                         Download PDF
                     </button>

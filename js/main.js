@@ -1,5 +1,6 @@
 // Main application logic
 import AzureAIService from './azure-services.js';
+import { generatePDFFromHTML } from './pdf-utils.js';
 
 // Initialize Azure AI Service
 let azureService;
@@ -28,8 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize the application
     console.log('PlanAI initialized');
 
-    // Initialize Azure AI Service (we'll use a placeholder API key for now)
-    azureService = new AzureAIService('placeholder-api-key');
+    // Initialize Azure AI Service with the provided API key
+    azureService = new AzureAIService('PlaceHolder API');
 
     // Set up navigation
     setupNavigation();
@@ -292,6 +293,18 @@ function initializeComponent(componentName) {
         case 'login':
             initializeLogin();
             break;
+        case 'interview-prep':
+            initializeInterviewPrep();
+            break;
+        case 'cv-builder':
+            initializeCVBuilder();
+            break;
+        case 'study-plan':
+            updateStudyPlanView();
+            break;
+        case 'practice-test':
+            initializePracticeTest();
+            break;
     }
 }
 
@@ -426,19 +439,19 @@ function updateStudyPlanView() {
 
         userData.studyPlan.weeklyPlans.forEach(week => {
             const weekElement = document.createElement('div');
-            weekElement.className = 'study-plan-week bg-gray-50 p-4 rounded-md';
+            weekElement.className = 'study-plan-week bg-dark-300 p-4 rounded-md border border-purple-900/30 shadow-glow';
 
             // Add week title with focus area
             const weekTitle = document.createElement('h4');
-            weekTitle.className = 'text-lg font-bold mb-3';
+            weekTitle.className = 'text-lg font-bold mb-3 text-gray-200';
             weekTitle.textContent = `Week ${week.week}: ${week.focus}`;
             weekElement.appendChild(weekTitle);
 
             // Add topics if available (curriculum-based plans)
             if (week.topics && week.topics.length > 0) {
                 const topicsContainer = document.createElement('div');
-                topicsContainer.className = 'mb-3 text-sm text-gray-600';
-                topicsContainer.innerHTML = `<strong>Topics:</strong> ${week.topics.join(', ')}`;
+                topicsContainer.className = 'mb-3 text-sm text-gray-400';
+                topicsContainer.innerHTML = `<strong class="text-gray-300">Topics:</strong> ${week.topics.join(', ')}`;
                 weekElement.appendChild(topicsContainer);
             }
 
@@ -453,9 +466,9 @@ function updateStudyPlanView() {
             const column1 = document.createElement('div');
             week.dailyTasks.slice(0, midpoint).forEach(task => {
                 const taskElement = document.createElement('div');
-                taskElement.className = 'study-plan-day border-b pb-2 mb-2';
+                taskElement.className = 'study-plan-day border-b border-purple-900/30 pb-2 mb-2 text-gray-300';
                 taskElement.innerHTML = `
-                    <span class="font-semibold">${task.day}:</span>
+                    <span class="font-semibold text-gray-200">${task.day}:</span>
                     <span>${task.task}</span>
                 `;
                 column1.appendChild(taskElement);
@@ -466,9 +479,9 @@ function updateStudyPlanView() {
             const column2 = document.createElement('div');
             week.dailyTasks.slice(midpoint).forEach(task => {
                 const taskElement = document.createElement('div');
-                taskElement.className = 'study-plan-day border-b pb-2 mb-2';
+                taskElement.className = 'study-plan-day border-b border-purple-900/30 pb-2 mb-2 text-gray-300';
                 taskElement.innerHTML = `
-                    <span class="font-semibold">${task.day}:</span>
+                    <span class="font-semibold text-gray-200">${task.day}:</span>
                     <span>${task.task}</span>
                 `;
                 column2.appendChild(taskElement);
@@ -486,19 +499,19 @@ function updateStudyPlanView() {
 
         userData.studyPlan.recommendedResources.forEach(resource => {
             const resourceElement = document.createElement('div');
-            resourceElement.className = 'bg-white p-4 rounded-lg shadow-sm';
+            resourceElement.className = 'bg-dark-200 p-4 rounded-lg shadow-glow border border-purple-900/30';
 
             let resourceContent = `
-                <h4 class="font-bold">${resource.type}</h4>
-                <p>${resource.title}</p>
+                <h4 class="font-bold text-gray-200">${resource.type}</h4>
+                <p class="text-gray-300">${resource.title}</p>
             `;
 
             if (resource.author) {
-                resourceContent += `<p class="text-sm text-gray-600">by ${resource.author}</p>`;
+                resourceContent += `<p class="text-sm text-gray-400">by ${resource.author}</p>`;
             }
 
             if (resource.url) {
-                resourceContent += `<a href="${resource.url}" class="text-blue-600 hover:underline" target="_blank">Visit Resource</a>`;
+                resourceContent += `<a href="${resource.url}" class="text-purple-400 hover:text-purple-300 transition-all duration-300" target="_blank">Visit Resource</a>`;
             }
 
             resourceElement.innerHTML = resourceContent;
@@ -765,11 +778,38 @@ function initializeInterviewPrep() {
             };
 
             try {
+                // Show loading indicator
+                const loadingIndicator = document.createElement('div');
+                loadingIndicator.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                loadingIndicator.innerHTML = `
+                    <div class="bg-dark-200 p-4 rounded-lg shadow-lg text-center border border-purple-900/30">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-2"></div>
+                        <p class="text-gray-300">Generating interview questions...</p>
+                    </div>
+                `;
+                document.body.appendChild(loadingIndicator);
+
                 // Generate interview questions
                 await generateInterviewQuestions(interviewSetup);
 
+                // Remove loading indicator
+                document.body.removeChild(loadingIndicator);
+
+                // Hide the interview setup section
+                const setupSection = document.querySelector('.grid');
+                if (setupSection) {
+                    setupSection.classList.add('hidden');
+                } else {
+                    // Fallback if grid class is not found
+                    const setupSections = document.querySelectorAll('.bg-dark-300, .bg-dark-400');
+                    setupSections.forEach(section => {
+                        if (section.contains(interviewSetupForm)) {
+                            section.classList.add('hidden');
+                        }
+                    });
+                }
+
                 // Show interview session
-                interviewSetupForm.closest('.grid').classList.add('hidden');
                 interviewSession.classList.remove('hidden');
 
                 // Display first question
@@ -864,8 +904,8 @@ function initializeInterviewPrep() {
 
         // Display question
         document.getElementById('interview-question').innerHTML = `
-            <p class="text-lg font-medium">${azureService.interviewData.questions[currentQuestion].text}</p>
-            <p class="text-sm text-gray-500 mt-2">Question type: ${azureService.interviewData.questions[currentQuestion].type}</p>
+            <p class="text-lg font-medium text-gray-200">${azureService.interviewData.questions[currentQuestion].text}</p>
+            <p class="text-sm text-gray-400 mt-2">Question type: ${azureService.interviewData.questions[currentQuestion].type}</p>
         `;
 
         // Clear answer input
@@ -886,38 +926,38 @@ function initializeInterviewPrep() {
         const feedbackHTML = `
             <div class="mb-4">
                 <div class="flex items-center mb-2">
-                    <div class="w-full bg-gray-200 rounded-full h-4">
-                        <div class="bg-blue-600 h-4 rounded-full" style="width: ${feedback.score}%"></div>
+                    <div class="w-full bg-dark-500 rounded-full h-4">
+                        <div class="bg-gradient-to-r from-purple-500 to-indigo-600 h-4 rounded-full" style="width: ${feedback.score}%"></div>
                     </div>
-                    <span class="ml-4 font-semibold">${feedback.score}%</span>
+                    <span class="ml-4 font-semibold text-gray-200">${feedback.score}%</span>
                 </div>
             </div>
 
             <div class="mb-4">
-                <h4 class="font-semibold mb-2">Content</h4>
-                <p class="text-gray-700">${feedback.content}</p>
+                <h4 class="font-semibold mb-2 text-gray-200">Content</h4>
+                <p class="text-gray-300">${feedback.content}</p>
             </div>
 
             <div class="mb-4">
-                <h4 class="font-semibold mb-2">Delivery</h4>
-                <p class="text-gray-700">${feedback.delivery}</p>
+                <h4 class="font-semibold mb-2 text-gray-200">Delivery</h4>
+                <p class="text-gray-300">${feedback.delivery}</p>
             </div>
 
             <div class="mb-4">
-                <h4 class="font-semibold mb-2">Areas for Improvement</h4>
-                <p class="text-gray-700">${feedback.improvement}</p>
+                <h4 class="font-semibold mb-2 text-gray-200">Areas for Improvement</h4>
+                <p class="text-gray-300">${feedback.improvement}</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <h4 class="font-semibold mb-2">Strengths</h4>
-                    <ul class="list-disc list-inside text-gray-700">
+                    <h4 class="font-semibold mb-2 text-gray-200">Strengths</h4>
+                    <ul class="list-disc list-inside text-gray-300">
                         ${feedback.positives.map(positive => `<li>${positive}</li>`).join('')}
                     </ul>
                 </div>
                 <div>
-                    <h4 class="font-semibold mb-2">Areas to Work On</h4>
-                    <ul class="list-disc list-inside text-gray-700">
+                    <h4 class="font-semibold mb-2 text-gray-200">Areas to Work On</h4>
+                    <ul class="list-disc list-inside text-gray-300">
                         ${feedback.negatives.map(negative => `<li>${negative}</li>`).join('')}
                     </ul>
                 </div>
@@ -978,7 +1018,18 @@ function initializeInterviewPrep() {
         interviewResults.classList.add('hidden');
 
         // Show setup form
-        interviewSetupForm.closest('.grid').classList.remove('hidden');
+        const setupSection = document.querySelector('.grid');
+        if (setupSection) {
+            setupSection.classList.remove('hidden');
+        } else {
+            // Fallback if grid class is not found
+            const setupSections = document.querySelectorAll('.bg-dark-300, .bg-dark-400');
+            setupSections.forEach(section => {
+                if (section.contains(interviewSetupForm)) {
+                    section.classList.remove('hidden');
+                }
+            });
+        }
 
         // Reset form
         interviewSetupForm.reset();
@@ -1132,7 +1183,7 @@ function initializeCVBuilder() {
                 suggestedSkillsElement.innerHTML = '';
                 suggestedSkills.forEach(skill => {
                     const skillElement = document.createElement('span');
-                    skillElement.className = 'bg-blue-100 text-blue-800 px-2 py-1 rounded cursor-pointer hover:bg-blue-200';
+                    skillElement.className = 'bg-dark-200 text-purple-400 px-2 py-1 rounded cursor-pointer hover:bg-dark-300 border border-purple-900/30 transition-all duration-300';
                     skillElement.textContent = skill;
 
                     // Add click event to add skill to the skills input
@@ -1267,10 +1318,33 @@ function initializeCVBuilder() {
                     downloadCVBtn.parentNode.replaceChild(newDownloadBtn, downloadCVBtn);
 
                     // Add new event listener
-                    newDownloadBtn.addEventListener('click', () => {
-                        alert('In a real implementation, this would generate a PDF file of your CV using Azure Document Intelligence.');
-                        previewModal.classList.add('hidden');
-                        previewModal.style.display = 'none';
+                    newDownloadBtn.addEventListener('click', async () => {
+                        try {
+                            // Get the CV content element
+                            const cvContent = document.getElementById('cv-preview-content');
+
+                            if (!cvContent) {
+                                console.error('CV content element not found');
+                                alert('There was an error generating your PDF. Please try again.');
+                                return;
+                            }
+
+                            // Generate a filename based on the user's name
+                            const userName = userData.cvData.personalInfo.fullName || 'CV';
+                            const fileName = `${userName.replace(/\s+/g, '_')}_CV.pdf`;
+
+                            // Generate and download the PDF
+                            const success = await generatePDFFromHTML(cvContent, fileName);
+
+                            if (success) {
+                                // Close the modal only if PDF generation was successful
+                                previewModal.classList.add('hidden');
+                                previewModal.style.display = 'none';
+                            }
+                        } catch (error) {
+                            console.error('Error downloading CV as PDF:', error);
+                            alert('There was an error generating your PDF. Please try again.');
+                        }
                     });
                 }
 
@@ -1305,13 +1379,37 @@ function initializeCVBuilder() {
             userData.cvData = cvData;
 
             try {
-                // In a real implementation, this would save the CV to the user's account
-                // and generate a downloadable PDF using Azure Document Intelligence
+                // Generate CV HTML
+                const cvHTML = await azureService.generateFullCV(cvData);
 
-                alert('Your CV has been generated successfully! In a real implementation, you would be able to download it as a PDF.');
+                // Create a temporary container to hold the CV HTML
+                const tempContainer = document.createElement('div');
+                tempContainer.innerHTML = cvHTML;
+                tempContainer.style.padding = '20px';
+                tempContainer.style.backgroundColor = 'white';
+                tempContainer.style.color = 'black';
 
-                // Navigate back to career tools
-                navigateToPage('career-tools');
+                // Temporarily append to the body but make it invisible
+                tempContainer.style.position = 'absolute';
+                tempContainer.style.left = '-9999px';
+                document.body.appendChild(tempContainer);
+
+                // Generate a filename based on the user's name
+                const userName = userData.cvData.personalInfo.fullName || 'CV';
+                const fileName = `${userName.replace(/\s+/g, '_')}_CV.pdf`;
+
+                // Generate and download the PDF
+                const success = await generatePDFFromHTML(tempContainer, fileName);
+
+                // Remove the temporary container
+                document.body.removeChild(tempContainer);
+
+                if (success) {
+                    alert('Your CV has been generated successfully and downloaded as a PDF!');
+
+                    // Navigate back to career tools
+                    navigateToPage('career-tools');
+                }
             } catch (error) {
                 console.error('Error generating CV:', error);
                 alert('There was an error generating your CV. Please try again.');
@@ -1325,7 +1423,7 @@ function initializeCVBuilder() {
         const education = [];
         const educationEntries = document.querySelectorAll('.education-entry');
 
-        educationEntries.forEach((entry, index) => {
+        educationEntries.forEach((_, index) => {
             const entryNumber = index + 1;
             const school = document.getElementById(`school-name-${entryNumber}`)?.value;
             const degree = document.getElementById(`degree-${entryNumber}`)?.value;
@@ -1351,7 +1449,7 @@ function initializeCVBuilder() {
         const experience = [];
         const experienceEntries = document.querySelectorAll('.experience-entry');
 
-        experienceEntries.forEach((entry, index) => {
+        experienceEntries.forEach((_, index) => {
             const entryNumber = index + 1;
             const company = document.getElementById(`company-name-${entryNumber}`)?.value;
             const title = document.getElementById(`job-title-${entryNumber}`)?.value;

@@ -1,32 +1,32 @@
 <!DOCTYPE html>
-<div class="bg-white p-6 rounded-lg shadow-md">
+<div class="bg-dark-200 p-6 rounded-lg shadow-md border border-purple-900/30">
     <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold">Interview Preparation</h2>
-        <button id="back-to-career-tools" class="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 transition">
+        <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-300">Interview Preparation</h2>
+        <button id="back-to-career-tools" class="bg-dark-400 text-gray-200 px-4 py-2 rounded hover:bg-dark-500 transition">
             Back to Career Tools
         </button>
     </div>
 
     <div class="mb-8">
-        <p class="text-gray-600 mb-4">
+        <p class="text-gray-300 mb-4">
             Practice technical interviews with AI-powered feedback. Our Azure AI will simulate an interviewer and provide real-time suggestions to improve your interview skills.
         </p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
         <!-- Interview Setup -->
-        <div class="bg-gray-50 p-6 rounded-md">
-            <h3 class="text-xl font-semibold mb-4">Interview Setup</h3>
+        <div class="bg-dark-300 p-6 rounded-md border border-purple-900/30">
+            <h3 class="text-xl font-semibold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-300">Interview Setup</h3>
 
             <form id="interview-setup-form" class="space-y-4">
                 <div>
-                    <label class="block text-gray-700 mb-2" for="job-position">Job Position</label>
-                    <input type="text" id="job-position" class="w-full p-2 border rounded" placeholder="e.g., Software Engineer, Data Scientist" required>
+                    <label class="block text-gray-300 mb-2" for="job-position">Job Position</label>
+                    <input type="text" id="job-position" class="w-full p-2 border rounded bg-dark-300 text-gray-200 border-dark-400 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., Software Engineer, Data Scientist" required>
                 </div>
 
                 <div>
-                    <label class="block text-gray-700 mb-2" for="experience-level">Experience Level</label>
-                    <select id="experience-level" class="w-full p-2 border rounded" required>
+                    <label class="block text-gray-300 mb-2" for="experience-level">Experience Level</label>
+                    <select id="experience-level" class="w-full p-2 border rounded bg-dark-300 text-gray-200 border-dark-400 focus:ring-purple-500 focus:border-transparent" required>
                         <option value="">Select experience level</option>
                         <option value="entry">Entry Level (0-2 years)</option>
                         <option value="mid">Mid Level (3-5 years)</option>
@@ -35,8 +35,8 @@
                 </div>
 
                 <div>
-                    <label class="block text-gray-700 mb-2" for="interview-type">Interview Type</label>
-                    <select id="interview-type" class="w-full p-2 border rounded" required>
+                    <label class="block text-gray-300 mb-2" for="interview-type">Interview Type</label>
+                    <select id="interview-type" class="w-full p-2 border rounded bg-dark-300 text-gray-200 border-dark-400 focus:ring-purple-500 focus:border-transparent" required>
                         <option value="">Select interview type</option>
                         <option value="technical">Technical Interview</option>
                         <option value="behavioral">Behavioral Interview</option>
@@ -45,71 +45,71 @@
                 </div>
 
                 <div>
-                    <label class="block text-gray-700 mb-2" for="skills">Key Skills (comma separated)</label>
-                    <textarea id="skills" class="w-full p-2 border rounded" rows="2" placeholder="e.g., JavaScript, React, Node.js, Problem Solving"></textarea>
+                    <label class="block text-gray-300 mb-2" for="skills">Key Skills (comma separated)</label>
+                    <textarea id="skills" class="w-full p-2 border rounded bg-dark-300 text-gray-200 border-dark-400 focus:ring-purple-500 focus:border-transparent" rows="2" placeholder="e.g., JavaScript, React, Node.js, Problem Solving"></textarea>
                 </div>
 
                 <div>
-                    <label class="block text-gray-700 mb-2" for="interview-duration">Interview Duration</label>
-                    <select id="interview-duration" class="w-full p-2 border rounded" required>
+                    <label class="block text-gray-300 mb-2" for="interview-duration">Interview Duration</label>
+                    <select id="interview-duration" class="w-full p-2 border rounded bg-dark-300 text-gray-200 border-dark-400 focus:ring-purple-500 focus:border-transparent" required>
                         <option value="10">10 minutes (5 questions)</option>
                         <option value="20" selected>20 minutes (10 questions)</option>
                         <option value="30">30 minutes (15 questions)</option>
                     </select>
                 </div>
 
-                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                <button type="submit" class="bg-gradient-to-r from-purple-500 to-indigo-600 shadow-glow text-white px-4 py-2 rounded hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105">
                     Start Interview
                 </button>
             </form>
         </div>
 
         <!-- Interview Tips -->
-        <div class="bg-blue-50 p-6 rounded-md">
-            <h3 class="text-xl font-semibold mb-4">Interview Tips</h3>
+        <div class="bg-dark-400 p-6 rounded-md border border-purple-900/30">
+            <h3 class="text-xl font-semibold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-300">Interview Tips</h3>
 
-            <ul class="space-y-3 text-gray-700">
+            <ul class="space-y-3 text-gray-300">
                 <li class="flex items-start">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2 mt-0.5" viewbox="0 0 20 20" fill="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-400 mr-2 mt-0.5" viewbox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                     </svg>
                     <span>Speak clearly and at a moderate pace</span>
                 </li>
                 <li class="flex items-start">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2 mt-0.5" viewbox="0 0 20 20" fill="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-400 mr-2 mt-0.5" viewbox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                     </svg>
                     <span>Use the STAR method for behavioral questions (Situation, Task, Action, Result)</span>
                 </li>
                 <li class="flex items-start">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2 mt-0.5" viewbox="0 0 20 20" fill="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-400 mr-2 mt-0.5" viewbox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                     </svg>
                     <span>Think out loud when solving technical problems</span>
                 </li>
                 <li class="flex items-start">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2 mt-0.5" viewbox="0 0 20 20" fill="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-400 mr-2 mt-0.5" viewbox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                     </svg>
                     <span>Ask clarifying questions when needed</span>
                 </li>
                 <li class="flex items-start">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2 mt-0.5" viewbox="0 0 20 20" fill="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-400 mr-2 mt-0.5" viewbox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                     </svg>
                     <span>Prepare examples of your past work and achievements</span>
                 </li>
                 <li class="flex items-start">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2 mt-0.5" viewbox="0 0 20 20" fill="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-400 mr-2 mt-0.5" viewbox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                     </svg>
                     <span>Research the company and position before the interview</span>
                 </li>
             </ul>
 
-            <div class="mt-6 p-4 bg-blue-100 rounded-md">
-                <h4 class="font-semibold mb-2">How Our AI Helps You</h4>
-                <p class="text-sm">
+            <div class="mt-6 p-4 bg-dark-300 rounded-md border border-purple-900/30">
+                <h4 class="font-semibold mb-2 text-gray-200">How Our AI Helps You</h4>
+                <p class="text-sm text-gray-300">
                     Our Azure AI-powered interview simulator will ask you relevant questions based on your job position and experience level. After each response, you'll receive instant feedback on your answer's content, delivery, and areas for improvement.
                 </p>
             </div>
@@ -118,44 +118,44 @@
 
     <!-- Interview Session (Hidden initially) -->
     <div id="interview-session" class="hidden">
-        <div class="bg-gray-50 p-6 rounded-md mb-6">
+        <div class="bg-dark-300 p-6 rounded-md mb-6 border border-purple-900/30">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-semibold">Interview in Progress</h3>
+                <h3 class="text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-300">Interview in Progress</h3>
                 <div class="flex items-center">
-                    <span class="text-gray-600 mr-2">Question:</span>
-                    <span id="question-counter" class="font-semibold">1/10</span>
+                    <span class="text-gray-300 mr-2">Question:</span>
+                    <span id="question-counter" class="font-semibold text-gray-200">1/10</span>
                 </div>
             </div>
 
-            <div id="interview-question" class="mb-6 p-4 bg-white rounded-md shadow-sm">
-                <p class="text-lg font-medium">Loading question...</p>
+            <div id="interview-question" class="mb-6 p-4 bg-dark-200 rounded-md shadow-sm border border-purple-900/30">
+                <p class="text-lg font-medium text-gray-200">Loading question...</p>
             </div>
 
             <div class="mb-4">
-                <label class="block text-gray-700 mb-2" for="answer">Your Answer</label>
-                <textarea id="answer" class="w-full p-3 border rounded" rows="5" placeholder="Type your answer here..."></textarea>
+                <label class="block text-gray-300 mb-2" for="answer">Your Answer</label>
+                <textarea id="answer" class="w-full p-3 border rounded bg-dark-300 text-gray-200 border-dark-400 focus:ring-purple-500 focus:border-transparent" rows="5" placeholder="Type your answer here..."></textarea>
             </div>
 
             <div class="flex justify-between">
-                <button id="skip-question" class="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 transition">
+                <button id="skip-question" class="bg-dark-400 text-gray-200 px-4 py-2 rounded hover:bg-dark-500 transition">
                     Skip Question
                 </button>
-                <button id="submit-answer" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
+                <button id="submit-answer" class="bg-gradient-to-r from-purple-500 to-indigo-600 shadow-glow text-white px-6 py-2 rounded hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105">
                     Submit Answer
                 </button>
             </div>
         </div>
 
         <!-- Feedback Section (Hidden until answer is submitted) -->
-        <div id="feedback-section" class="hidden bg-blue-50 p-6 rounded-md mb-6">
-            <h3 class="text-xl font-semibold mb-4">AI Feedback</h3>
+        <div id="feedback-section" class="hidden bg-dark-400 p-6 rounded-md mb-6 border border-purple-900/30">
+            <h3 class="text-xl font-semibold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-300">AI Feedback</h3>
 
-            <div id="feedback-content" class="space-y-4">
+            <div id="feedback-content" class="space-y-4 text-gray-300">
                 <!-- Feedback will be inserted here -->
             </div>
 
             <div class="mt-6 flex justify-end">
-                <button id="next-question" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition">
+                <button id="next-question" class="bg-gradient-to-r from-emerald-500 to-teal-600 shadow-glow text-white px-6 py-2 rounded hover:from-emerald-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-105">
                     Next Question
                 </button>
             </div>
@@ -164,46 +164,46 @@
 
     <!-- Interview Results (Hidden until interview is complete) -->
     <div id="interview-results" class="hidden">
-        <div class="bg-green-50 p-6 rounded-md mb-6">
-            <h3 class="text-xl font-semibold mb-4">Interview Complete</h3>
+        <div class="bg-dark-300 p-6 rounded-md mb-6 border border-purple-900/30">
+            <h3 class="text-xl font-semibold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-300">Interview Complete</h3>
 
             <div class="mb-6">
-                <h4 class="font-semibold mb-2">Overall Performance</h4>
+                <h4 class="font-semibold mb-2 text-gray-200">Overall Performance</h4>
                 <div class="flex items-center mb-2">
-                    <div class="w-full bg-gray-200 rounded-full h-4">
-                        <div id="performance-bar" class="bg-green-600 h-4 rounded-full" style="width: 75%"></div>
+                    <div class="w-full bg-dark-400 rounded-full h-4">
+                        <div id="performance-bar" class="bg-gradient-to-r from-emerald-500 to-teal-600 h-4 rounded-full" style="width: 75%"></div>
                     </div>
-                    <span id="performance-score" class="ml-4 font-semibold">75%</span>
+                    <span id="performance-score" class="ml-4 font-semibold text-gray-200">75%</span>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
-                    <h4 class="font-semibold mb-2">Strengths</h4>
-                    <ul id="strengths-list" class="list-disc list-inside text-gray-700">
+                    <h4 class="font-semibold mb-2 text-gray-200">Strengths</h4>
+                    <ul id="strengths-list" class="list-disc list-inside text-gray-300">
                         <!-- Strengths will be inserted here -->
                     </ul>
                 </div>
                 <div>
-                    <h4 class="font-semibold mb-2">Areas for Improvement</h4>
-                    <ul id="improvements-list" class="list-disc list-inside text-gray-700">
+                    <h4 class="font-semibold mb-2 text-gray-200">Areas for Improvement</h4>
+                    <ul id="improvements-list" class="list-disc list-inside text-gray-300">
                         <!-- Improvements will be inserted here -->
                     </ul>
                 </div>
             </div>
 
-            <div class="bg-white p-4 rounded-md shadow-sm mb-6">
-                <h4 class="font-semibold mb-2">AI Recommendations</h4>
-                <p id="recommendations" class="text-gray-700">
+            <div class="bg-dark-200 p-4 rounded-md shadow-sm mb-6 border border-purple-900/30">
+                <h4 class="font-semibold mb-2 text-gray-200">AI Recommendations</h4>
+                <p id="recommendations" class="text-gray-300">
                     <!-- Recommendations will be inserted here -->
                 </p>
             </div>
 
             <div class="flex justify-between">
-                <button id="return-to-career-tools" class="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 transition">
+                <button id="return-to-career-tools" class="bg-dark-400 text-gray-200 px-4 py-2 rounded hover:bg-dark-500 transition">
                     Return to Career Tools
                 </button>
-                <button id="start-new-interview" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
+                <button id="start-new-interview" class="bg-gradient-to-r from-purple-500 to-indigo-600 shadow-glow text-white px-6 py-2 rounded hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105">
                     Start New Interview
                 </button>
             </div>
