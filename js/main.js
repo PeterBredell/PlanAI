@@ -1,7 +1,7 @@
 // Main application logic
 import AzureAIService from './azure-services.js';
 import { generatePDFFromHTML } from './pdf-utils.js';
-import { initializeSupabase, getSupabaseClient } from './supabase-client.js';
+import { initializeSupabase } from './supabase-client.js';
 import authService from './auth-service.js';
 
 // Initialize Azure AI Service
@@ -129,23 +129,32 @@ async function navigateToPage(pageName) {
                 // Show loading indicator
                 selectedPage.classList.remove('hidden');
                 selectedPage.innerHTML = `
-                    <div class="flex justify-center items-center h-64">
-                        <div class="animate-pulse flex space-x-4">
-                            <div class="h-12 w-12 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full animate-pulse"></div>
-                            <div class="flex-1 space-y-4 py-1">
-                                <div class="h-4 bg-dark-300 rounded w-3/4"></div>
-                                <div class="space-y-2">
-                                    <div class="h-4 bg-dark-300 rounded"></div>
-                                    <div class="h-4 bg-dark-300 rounded w-5/6"></div>
-                                </div>
-                            </div>
+                    <div class="component-container page-container">
+                        <div class="loading-container">
+                            <div class="loading-spinner"></div>
                         </div>
                     </div>
                 `;
 
                 const response = await fetch(`components/${pageName}.html`);
                 if (response.ok) {
-                    const html = await response.text();
+                    let html = await response.text();
+
+                    // Check if the component already has our container classes
+                    if (!html.includes('component-container') && !html.includes('page-container')) {
+                        // Wrap the component in our container classes
+                        html = `
+                            <div class="component-container page-container">
+                                <div class="component-header">
+                                    <h2 class="component-title text-center">${pageName.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</h2>
+                                </div>
+                                <div class="component-body">
+                                    ${html}
+                                </div>
+                            </div>
+                        `;
+                    }
+
                     selectedPage.innerHTML = html;
 
                     // Apply dark theme to dynamically loaded components
@@ -224,6 +233,14 @@ function updateActiveNavLink(pageName) {
 
 // Function to apply dark theme to dynamically loaded components
 function applyDarkThemeToComponent(component) {
+    // Add page-container class to ensure proper spacing if not already present
+    if (!component.querySelector('.page-container')) {
+        const mainContent = component.querySelector('div');
+        if (mainContent) {
+            mainContent.classList.add('page-container');
+        }
+    }
+
     // Replace light theme classes with dark theme classes
 
     // Background colors
@@ -1745,19 +1762,13 @@ function initializeCVBuilder() {
 function initializeProfile() {
     // Get DOM elements
     const editProfileBtn = document.getElementById('edit-profile-btn');
-    const changePasswordBtn = document.getElementById('change-password-btn');
     const logoutBtn = document.getElementById('logout-btn');
     const profileInfoSection = document.getElementById('profile-info-section');
     const editProfileSection = document.getElementById('edit-profile-section');
-    const changePasswordSection = document.getElementById('change-password-section');
     const editProfileForm = document.getElementById('edit-profile-form');
-    const changePasswordForm = document.getElementById('change-password-form');
     const cancelEditProfileBtn = document.getElementById('cancel-edit-profile');
-    const cancelChangePasswordBtn = document.getElementById('cancel-change-password');
     const profileUpdateError = document.getElementById('profile-update-error');
     const profileUpdateSuccess = document.getElementById('profile-update-success');
-    const passwordUpdateError = document.getElementById('password-update-error');
-    const passwordUpdateSuccess = document.getElementById('password-update-success');
 
     // Get current user
     const currentUser = authService.getCurrentUser();
@@ -1777,23 +1788,15 @@ function initializeProfile() {
             // Hide profile info section and show edit profile section
             profileInfoSection.classList.add('hidden');
             editProfileSection.classList.remove('hidden');
-            changePasswordSection.classList.add('hidden');
 
             // Populate form with current user data
             const nameInput = document.getElementById('edit-name');
             if (nameInput && currentUser.user_metadata && currentUser.user_metadata.full_name) {
                 nameInput.value = currentUser.user_metadata.full_name;
+            } else if (nameInput) {
+                // If no full_name in metadata, use a default or empty string
+                nameInput.value = '';
             }
-        });
-    }
-
-    // Handle change password button click
-    if (changePasswordBtn) {
-        changePasswordBtn.addEventListener('click', () => {
-            // Hide profile info section and show change password section
-            profileInfoSection.classList.add('hidden');
-            editProfileSection.classList.add('hidden');
-            changePasswordSection.classList.remove('hidden');
         });
     }
 
@@ -1831,22 +1834,6 @@ function initializeProfile() {
         });
     }
 
-    // Handle cancel change password button click
-    if (cancelChangePasswordBtn) {
-        cancelChangePasswordBtn.addEventListener('click', () => {
-            // Hide change password section and show profile info section
-            profileInfoSection.classList.remove('hidden');
-            changePasswordSection.classList.add('hidden');
-
-            // Clear any error or success messages
-            hideError(passwordUpdateError);
-            hideSuccess(passwordUpdateSuccess);
-
-            // Reset form
-            changePasswordForm.reset();
-        });
-    }
-
     // Handle edit profile form submission
     if (editProfileForm) {
         editProfileForm.addEventListener('submit', async (e) => {
@@ -1870,15 +1857,18 @@ function initializeProfile() {
                 submitButton.textContent = 'Saving...';
                 submitButton.disabled = true;
 
-                // Update profile
-                const { success, error } = await authService.updateProfile({ full_name: name });
+                // Update profile with the new name
+                const { success, error, data } = await authService.updateProfile({ full_name: name });
 
                 if (success) {
                     // Show success message
                     showSuccess(profileUpdateSuccess, 'Profile updated successfully!');
 
-                    // Update profile display
-                    updateProfileDisplay(authService.getCurrentUser());
+                    // Force refresh the current user to get updated metadata
+                    const updatedUser = data?.user || authService.getCurrentUser();
+
+                    // Update profile display with the updated user data
+                    updateProfileDisplay(updatedUser);
 
                     // Return to profile info after a short delay
                     setTimeout(() => {
@@ -1901,62 +1891,7 @@ function initializeProfile() {
         });
     }
 
-    // Handle change password form submission
-    if (changePasswordForm) {
-        changePasswordForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
 
-            const currentPassword = document.getElementById('current-password').value;
-            const newPassword = document.getElementById('new-password').value;
-            const confirmNewPassword = document.getElementById('confirm-new-password').value;
-
-            // Simple validation
-            if (!currentPassword || !newPassword || !confirmNewPassword) {
-                showError(passwordUpdateError, 'Please fill in all fields');
-                return;
-            }
-
-            if (newPassword !== confirmNewPassword) {
-                showError(passwordUpdateError, 'New passwords do not match');
-                return;
-            }
-
-            if (newPassword.length < 6) {
-                showError(passwordUpdateError, 'New password must be at least 6 characters');
-                return;
-            }
-
-            // Clear previous messages
-            hideError(passwordUpdateError);
-            hideSuccess(passwordUpdateSuccess);
-
-            try {
-                // Show loading state
-                const submitButton = changePasswordForm.querySelector('button[type="submit"]');
-                submitButton.textContent = 'Updating...';
-                submitButton.disabled = true;
-
-                // Update password (this is a placeholder - Supabase doesn't have a direct method for this)
-                // In a real implementation, you would need to use a custom API endpoint or Supabase function
-                alert('Password change functionality will be implemented when Supabase details are provided.');
-
-                // Reset form
-                changePasswordForm.reset();
-
-                // Return to profile info
-                profileInfoSection.classList.remove('hidden');
-                changePasswordSection.classList.add('hidden');
-            } catch (error) {
-                console.error('Password update error:', error);
-                showError(passwordUpdateError, 'An unexpected error occurred. Please try again.');
-            } finally {
-                // Reset button state
-                const submitButton = changePasswordForm.querySelector('button[type="submit"]');
-                submitButton.textContent = 'Update Password';
-                submitButton.disabled = false;
-            }
-        });
-    }
 
     // Helper function to update profile display
     function updateProfileDisplay(user) {
