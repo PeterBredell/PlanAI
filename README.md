@@ -1,9 +1,7 @@
 # PlanAI - AI-Powered Educational Planning Assistant
 
 <div align="center">
-  <p>PlanAI</p>
   <p><em>Your personalized AI companion for educational success</em></p>
-
 </div>
 
 ## 📚 Overview
