@@ -1,7 +1,7 @@
 # PlanAI - AI-Powered Educational Planning Assistant
 
 <div align="center">
-  <img src="https://via.placeholder.com/200x200.png?text=PlanAI+Logo" alt="PlanAI Logo" width="200" height="200">
+  <p>PlanAI</p>
   <p><em>Your personalized AI companion for educational success</em></p>
 
 </div>
@@ -267,5 +267,5 @@ PlanAI follows an iterative development approach with regular updates based on:
 
 <div align="center">
   <p>Made with ❤️ by the PlanAI Team</p>
-  <p>© 2023 PlanAI. All rights reserved.</p>
+  <p>© 2025 PlanAI. All rights reserved.</p>
 </div>
