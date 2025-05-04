@@ -1,4 +1,6 @@
 // Azure services integration
+import PracticeTestGenerator from './practice-test-generator.js';
+
 class AzureAIService {
     constructor(apiKey) {
         this.apiKey = apiKey;
@@ -24,6 +26,9 @@ class AzureAIService {
             currentCurriculum: null,
             studyPlans: {}
         };
+
+        // Initialize practice test generator
+        this.practiceTestGenerator = new PracticeTestGenerator();
     }
 
     async generateStudyPlan(testResults, duration) {
@@ -54,12 +59,18 @@ class AzureAIService {
         // Simulate API call delay
         await this.simulateApiCall();
 
-        // Return a mock practice test
+        // Extract topics from the curriculum
+        const topics = curriculum.topics ? curriculum.topics.map(topic => topic.name) : [];
+
+        // Generate questions using our practice test generator
+        const questions = this.practiceTestGenerator.generateQuestions(curriculum.subject, topics);
+
+        // Return a practice test with AI-generated questions
         return {
             subject: curriculum.subject,
-            questions: this.generateMockQuestions(curriculum),
-            timeLimit: 60, // minutes
-            totalPoints: 100
+            questions: questions,
+            timeLimit: 30, // minutes
+            totalPoints: questions.length * 10
         };
     }
 
@@ -110,14 +121,19 @@ class AzureAIService {
 
         // In a real implementation, we would send this prompt to Azure OpenAI
         // For now, generate a mock study plan
+        const weeklyPlans = this.generateCurriculumWeeklyPlans(this.curriculumData.currentCurriculum, duration);
+
+        // Extract all topics for resource generation
+        const allTopics = this.curriculumData.currentCurriculum.topics.map(topic => topic.name);
+
         const studyPlan = {
             id: `sp-${Date.now()}`,
             curriculumId: curriculumId,
             subject: this.curriculumData.currentCurriculum.subject,
             duration: duration,
             creationDate: new Date().toISOString(),
-            weeklyPlans: this.generateCurriculumWeeklyPlans(this.curriculumData.currentCurriculum, duration),
-            recommendedResources: this.generateMockResources(this.curriculumData.currentCurriculum.subject),
+            weeklyPlans: weeklyPlans,
+            recommendedResources: this.generateMockResources(this.curriculumData.currentCurriculum.subject, allTopics),
             aiGeneratedFeedback: this.generateCurriculumFeedback(this.curriculumData.currentCurriculum, additionalNotes)
         };
 
@@ -269,26 +285,127 @@ class AzureAIService {
         return subjectFeedback[curriculum.subject] + personalization;
     }
 
-    generateMockResources(subject) {
+    generateMockResources(subject, topics = []) {
+        // Base resources by subject
         const resourcesBySubject = {
             math: [
                 { type: 'Book', title: 'Advanced Mathematics', author: 'John Smith' },
-                { type: 'Website', title: 'Khan Academy', url: 'https://www.khanacademy.org' },
-                { type: 'Video', title: 'Calculus Fundamentals', url: 'https://example.com/calculus' }
+                { type: 'Website', title: 'Khan Academy', url: 'https://www.khanacademy.org/math' },
+                { type: 'Video', title: 'Calculus Fundamentals', url: 'https://www.youtube.com/results?search_query=calculus+fundamentals' }
             ],
             science: [
                 { type: 'Book', title: 'Modern Physics', author: 'Jane Doe' },
                 { type: 'Website', title: 'NASA Education', url: 'https://www.nasa.gov/education' },
-                { type: 'Video', title: 'Chemistry Basics', url: 'https://example.com/chemistry' }
+                { type: 'Video', title: 'Chemistry Basics', url: 'https://www.youtube.com/results?search_query=chemistry+basics' }
             ],
             english: [
                 { type: 'Book', title: 'English Grammar', author: 'Emily Johnson' },
                 { type: 'Website', title: 'Grammarly', url: 'https://www.grammarly.com' },
-                { type: 'Video', title: 'Essay Writing Tips', url: 'https://example.com/essays' }
+                { type: 'Video', title: 'Essay Writing Tips', url: 'https://www.youtube.com/results?search_query=essay+writing+tips' }
+            ],
+            history: [
+                { type: 'Book', title: 'World History: Patterns of Interaction', author: 'Roger B. Beck' },
+                { type: 'Website', title: 'History.com', url: 'https://www.history.com/' },
+                { type: 'Video', title: 'Crash Course History', url: 'https://www.youtube.com/results?search_query=crash+course+history' }
+            ],
+            computer_science: [
+                { type: 'Book', title: 'Introduction to Algorithms', author: 'Thomas H. Cormen' },
+                { type: 'Website', title: 'W3Schools', url: 'https://www.w3schools.com/' },
+                { type: 'Video', title: 'CS50 Lectures', url: 'https://www.youtube.com/results?search_query=cs50+lectures' }
             ]
         };
 
-        return resourcesBySubject[subject] || resourcesBySubject.math;
+        // Topic-specific resources
+        const topicResources = {
+            // Math topics
+            'Algebra': [
+                { type: 'Interactive', title: 'Algebra Practice', url: 'https://www.khanacademy.org/math/algebra' },
+                { type: 'Video', title: 'Algebra Explained', url: 'https://www.youtube.com/results?search_query=algebra+explained' }
+            ],
+            'Geometry': [
+                { type: 'Interactive', title: 'Geometry Tools', url: 'https://www.geogebra.org/' },
+                { type: 'Video', title: 'Geometry Fundamentals', url: 'https://www.youtube.com/results?search_query=geometry+fundamentals' }
+            ],
+            'Calculus': [
+                { type: 'Interactive', title: 'Calculus Visualized', url: 'https://www.desmos.com/calculator' },
+                { type: 'Video', title: 'Calculus Made Easy', url: 'https://www.youtube.com/results?search_query=calculus+made+easy' }
+            ],
+            'Statistics': [
+                { type: 'Interactive', title: 'Statistics Tools', url: 'https://www.statcrunch.com/' },
+                { type: 'Video', title: 'Statistics Explained', url: 'https://www.youtube.com/results?search_query=statistics+explained' }
+            ],
+            'Trigonometry': [
+                { type: 'Interactive', title: 'Trigonometry Practice', url: 'https://www.mathsisfun.com/algebra/trigonometry.html' },
+                { type: 'Video', title: 'Trigonometry Basics', url: 'https://www.youtube.com/results?search_query=trigonometry+basics' }
+            ],
+
+            // Science topics
+            'Physics': [
+                { type: 'Interactive', title: 'Physics Simulations', url: 'https://phet.colorado.edu/en/simulations/category/physics' },
+                { type: 'Video', title: 'Physics Explained', url: 'https://www.youtube.com/results?search_query=physics+explained' }
+            ],
+            'Chemistry': [
+                { type: 'Interactive', title: 'Chemistry Experiments', url: 'https://www.chemistryworld.com/' },
+                { type: 'Video', title: 'Chemistry Basics', url: 'https://www.youtube.com/results?search_query=chemistry+basics' }
+            ],
+            'Biology': [
+                { type: 'Interactive', title: 'Biology Visualized', url: 'https://www.biointeractive.org/' },
+                { type: 'Video', title: 'Biology Crash Course', url: 'https://www.youtube.com/results?search_query=biology+crash+course' }
+            ],
+
+            // English topics
+            'Literature': [
+                { type: 'Interactive', title: 'Literature Analysis', url: 'https://www.sparknotes.com/' },
+                { type: 'Video', title: 'Literature Explained', url: 'https://www.youtube.com/results?search_query=literature+explained' }
+            ],
+            'Grammar': [
+                { type: 'Interactive', title: 'Grammar Practice', url: 'https://www.grammarly.com/' },
+                { type: 'Video', title: 'Grammar Rules', url: 'https://www.youtube.com/results?search_query=english+grammar+rules' }
+            ],
+            'Composition': [
+                { type: 'Interactive', title: 'Writing Tools', url: 'https://www.hemingwayapp.com/' },
+                { type: 'Video', title: 'Essay Writing Tips', url: 'https://www.youtube.com/results?search_query=essay+writing+tips' }
+            ],
+
+            // History topics
+            'Ancient Civilizations': [
+                { type: 'Interactive', title: 'Ancient History Maps', url: 'https://www.ancient.eu/map/' },
+                { type: 'Video', title: 'Ancient Civilizations', url: 'https://www.youtube.com/results?search_query=ancient+civilizations' }
+            ],
+            'Modern History': [
+                { type: 'Interactive', title: 'Modern History Timeline', url: 'https://www.timetoast.com/' },
+                { type: 'Video', title: 'Modern History Explained', url: 'https://www.youtube.com/results?search_query=modern+history+explained' }
+            ],
+
+            // Computer Science topics
+            'Programming Fundamentals': [
+                { type: 'Interactive', title: 'Coding Practice', url: 'https://www.codecademy.com/' },
+                { type: 'Video', title: 'Programming Basics', url: 'https://www.youtube.com/results?search_query=programming+basics' }
+            ],
+            'Algorithms': [
+                { type: 'Interactive', title: 'Algorithm Visualizer', url: 'https://visualgo.net/' },
+                { type: 'Video', title: 'Algorithm Explained', url: 'https://www.youtube.com/results?search_query=algorithms+explained' }
+            ],
+            'Web Development': [
+                { type: 'Interactive', title: 'Web Dev Practice', url: 'https://www.freecodecamp.org/' },
+                { type: 'Video', title: 'Web Development Tutorial', url: 'https://www.youtube.com/results?search_query=web+development+tutorial' }
+            ]
+        };
+
+        // Start with base resources
+        let resources = [...(resourcesBySubject[subject] || resourcesBySubject.math)];
+
+        // Add topic-specific resources if topics are provided
+        if (topics && topics.length > 0) {
+            topics.forEach(topic => {
+                if (topicResources[topic]) {
+                    resources = [...resources, ...topicResources[topic]];
+                }
+            });
+        }
+
+        // Limit to a reasonable number of resources
+        return resources.slice(0, 6);
     }
 
     generateMockFeedback(testResults) {
@@ -521,28 +638,38 @@ class AzureAIService {
     async generateInterviewQuestions(interviewSetup) {
         console.log('Generating interview questions with Azure AI');
 
-        // In a real implementation, this would call Azure OpenAI
-        // to generate interview questions based on the job position, experience level, and interview type
+        try {
+            // In a real implementation, this would call Azure OpenAI
+            // to generate interview questions based on the job position, experience level, and interview type
 
-        await this.simulateApiCall();
+            await this.simulateApiCall();
 
-        // Construct a prompt for the AI
-        const prompt = `Generate ${interviewSetup.questionCount} interview questions for a ${interviewSetup.experienceLevel} ${interviewSetup.position} position.
-        The interview type is ${interviewSetup.interviewType}.
-        Skills to focus on: ${interviewSetup.skills}`;
+            // Construct a prompt for the AI
+            const prompt = `Generate ${interviewSetup.questionCount} interview questions for a ${interviewSetup.experienceLevel} ${interviewSetup.position} position.
+            The interview type is ${interviewSetup.interviewType}.
+            Skills to focus on: ${interviewSetup.skills}`;
 
-        // In a real implementation, we would send this prompt to Azure OpenAI
-        // For now, return mock questions
-        const questions = this.generateMockInterviewQuestions(interviewSetup);
+            // In a real implementation, we would send this prompt to Azure OpenAI
+            // For now, return mock questions
+            const questions = this.generateMockInterviewQuestions(interviewSetup);
 
-        // Store the questions in the interview data
-        this.interviewData.questions = questions;
-        this.interviewData.currentQuestion = 0;
-        this.interviewData.answers = [];
-        this.interviewData.feedback = [];
-        this.interviewData.results = null;
+            // Verify that questions were generated
+            if (!questions || questions.length === 0) {
+                throw new Error('Failed to generate interview questions');
+            }
 
-        return questions;
+            // Store the questions in the interview data
+            this.interviewData.questions = questions;
+            this.interviewData.currentQuestion = 0;
+            this.interviewData.answers = [];
+            this.interviewData.feedback = [];
+            this.interviewData.results = null;
+
+            return questions;
+        } catch (error) {
+            console.error('Error generating interview questions:', error);
+            throw new Error('Failed to generate interview questions. Please try again.');
+        }
     }
 
     async evaluateAnswer(questionIndex, answer) {

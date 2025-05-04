@@ -563,6 +563,8 @@ function initializePracticeTest() {
     const questionsContainer = document.getElementById('questions-container');
     const submitTestBtn = document.getElementById('submit-test');
     const backToDashboardBtn = document.getElementById('back-to-dashboard');
+    const timeLimitElement = document.getElementById('time-limit');
+    const totalPointsElement = document.getElementById('total-points');
 
     if (!userData.practiceTest) return;
 
@@ -571,25 +573,85 @@ function initializePracticeTest() {
         testSubject.textContent = userData.practiceTest.subject;
     }
 
-    // In a real implementation, we would dynamically generate the questions here
+    // Update time limit and total points
+    if (timeLimitElement) {
+        timeLimitElement.textContent = userData.practiceTest.timeLimit;
+    }
+
+    if (totalPointsElement) {
+        totalPointsElement.textContent = userData.practiceTest.totalPoints;
+    }
+
+    // Dynamically generate the questions
     if (questionsContainer && userData.practiceTest.questions) {
-        console.log('Practice test questions:', userData.practiceTest.questions);
-        // We're using static questions for this demo
+        // Clear loading indicator
+        questionsContainer.innerHTML = '';
+
+        // Generate questions
+        userData.practiceTest.questions.forEach((question, index) => {
+            const questionElement = document.createElement('div');
+            questionElement.className = 'question-card bg-dark-300 p-4 rounded-lg border border-purple-900/30 shadow-glow';
+
+            // Question header
+            const questionHeader = document.createElement('h3');
+            questionHeader.className = 'text-lg font-bold mb-3 text-gray-200';
+            questionHeader.textContent = `Question ${index + 1}`;
+
+            // Question text
+            const questionText = document.createElement('p');
+            questionText.className = 'mb-4 text-gray-300';
+            questionText.textContent = question.text;
+
+            // Options container
+            const optionsContainer = document.createElement('div');
+            optionsContainer.className = 'options-container space-y-2';
+
+            // Generate options
+            question.options.forEach(option => {
+                const optionItem = document.createElement('div');
+                optionItem.className = 'option-item flex items-center p-2 rounded-md hover:bg-dark-400 transition-all duration-200';
+
+                const optionInput = document.createElement('input');
+                optionInput.type = 'radio';
+                optionInput.id = `q${question.id}-${option.id}`;
+                optionInput.name = `q${question.id}`;
+                optionInput.value = option.id;
+                optionInput.className = 'mr-3 text-purple-500 focus:ring-purple-500';
+
+                const optionLabel = document.createElement('label');
+                optionLabel.htmlFor = `q${question.id}-${option.id}`;
+                optionLabel.className = 'text-gray-300 cursor-pointer flex-1';
+                optionLabel.textContent = option.text;
+
+                optionItem.appendChild(optionInput);
+                optionItem.appendChild(optionLabel);
+                optionsContainer.appendChild(optionItem);
+            });
+
+            // Assemble question card
+            questionElement.appendChild(questionHeader);
+            questionElement.appendChild(questionText);
+            questionElement.appendChild(optionsContainer);
+
+            // Add to container
+            questionsContainer.appendChild(questionElement);
+        });
     }
 
     // Set up timer
     const timerElement = document.getElementById('timer');
     let timeLeft = userData.practiceTest.timeLimit * 60; // Convert minutes to seconds
+    let timerInterval;
 
     if (timerElement) {
-        const timer = setInterval(() => {
+        timerInterval = setInterval(() => {
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
 
             timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
             if (timeLeft <= 0) {
-                clearInterval(timer);
+                clearInterval(timerInterval);
                 alert('Time is up! Your test will be submitted automatically.');
                 submitTest();
             }
@@ -602,6 +664,7 @@ function initializePracticeTest() {
     if (backToDashboardBtn) {
         backToDashboardBtn.addEventListener('click', () => {
             if (confirm('Are you sure you want to leave? Your progress will be lost.')) {
+                if (timerInterval) clearInterval(timerInterval);
                 navigateToPage('dashboard');
             }
         });
@@ -614,9 +677,67 @@ function initializePracticeTest() {
 
     // Function to submit the test
     function submitTest() {
-        // In a real implementation, we would collect all answers and submit them
-        alert('Test submitted successfully! You will receive feedback shortly.');
-        navigateToPage('dashboard');
+        // Clear timer
+        if (timerInterval) clearInterval(timerInterval);
+
+        // Collect answers
+        const answers = {};
+        userData.practiceTest.questions.forEach(question => {
+            const selectedOption = document.querySelector(`input[name="q${question.id}"]:checked`);
+            answers[question.id] = selectedOption ? selectedOption.value : null;
+        });
+
+        // Calculate score
+        let correctAnswers = 0;
+        userData.practiceTest.questions.forEach(question => {
+            if (answers[question.id] === question.correctAnswer) {
+                correctAnswers++;
+            }
+        });
+
+        const score = Math.round((correctAnswers / userData.practiceTest.questions.length) * 100);
+
+        // Show results
+        const resultsHTML = `
+            <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div class="bg-dark-200 p-6 rounded-lg shadow-lg max-w-md w-full border border-purple-900/30">
+                    <h2 class="text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-300">Test Results</h2>
+
+                    <div class="mb-4">
+                        <div class="flex items-center mb-2">
+                            <div class="w-full bg-dark-500 rounded-full h-4">
+                                <div class="bg-gradient-to-r from-purple-500 to-indigo-600 h-4 rounded-full" style="width: ${score}%"></div>
+                            </div>
+                            <span class="ml-4 font-semibold text-gray-200">${score}%</span>
+                        </div>
+                        <p class="text-gray-300">You answered ${correctAnswers} out of ${userData.practiceTest.questions.length} questions correctly.</p>
+                    </div>
+
+                    <p class="text-gray-300 mb-4">
+                        ${score >= 80 ? 'Excellent work! You have a strong understanding of the material.' :
+                          score >= 60 ? 'Good job! You have a solid grasp of the material, but there\'s room for improvement.' :
+                          'You might need more practice with this material. Review the topics and try again.'}
+                    </p>
+
+                    <div class="flex justify-end">
+                        <button id="close-results" class="bg-gradient-to-r from-purple-500 to-indigo-600 shadow-glow text-white px-4 py-2 rounded hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105">
+                            Return to Dashboard
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add results to the page
+        const resultsElement = document.createElement('div');
+        resultsElement.innerHTML = resultsHTML;
+        document.body.appendChild(resultsElement);
+
+        // Set up close button
+        document.getElementById('close-results').addEventListener('click', () => {
+            document.body.removeChild(resultsElement);
+            navigateToPage('dashboard');
+        });
     }
 }
 
@@ -765,6 +886,12 @@ function initializeInterviewPrep() {
             const skills = document.getElementById('skills').value;
             const duration = document.getElementById('interview-duration').value;
 
+            // Validate form values
+            if (!position || !experienceLevel || !interviewType) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
             // Calculate number of questions based on duration
             const questionCount = Math.floor(parseInt(duration) / 2);
 
@@ -886,8 +1013,20 @@ function initializeInterviewPrep() {
     // Helper functions
 
     async function generateInterviewQuestions(interviewSetup) {
-        // Call Azure AI to generate interview questions
-        return await azureService.generateInterviewQuestions(interviewSetup);
+        try {
+            // Call Azure AI to generate interview questions
+            const questions = await azureService.generateInterviewQuestions(interviewSetup);
+
+            // Verify that questions were generated
+            if (!questions || questions.length === 0) {
+                throw new Error('No questions were generated');
+            }
+
+            return questions;
+        } catch (error) {
+            console.error('Error in generateInterviewQuestions:', error);
+            throw new Error('Failed to generate interview questions. Please try again.');
+        }
     }
 
     async function evaluateAnswer(questionIndex, answer) {
